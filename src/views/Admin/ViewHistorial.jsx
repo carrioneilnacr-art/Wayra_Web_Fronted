@@ -1,21 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import wayraApi from '../../api/wayraApi'; // Instancia maestra
+import wayraApi from '../../api/wayraApi'; 
 
 export const ViewHistorial = () => {
   const [pedidos, setPedidos] = useState([]);
   const [filtroFecha, setFiltroFecha] = useState(new Date().toLocaleDateString('en-CA'));
 
-  // 1. Cargar Historial con Axios
   const cargarHistorial = async () => {
     try {
-      // Usamos la instancia centralizada. Axios maneja el query param automáticamente.
       const res = await wayraApi.get(`/admin/historial?fecha=${filtroFecha}`);
       setPedidos(res.data);
     } catch (e) { 
       console.error("Error al cargar historial de Render:", e); 
     }
   };
-
   useEffect(() => { 
     cargarHistorial(); 
   }, [filtroFecha]);
@@ -63,15 +60,13 @@ export const ViewHistorial = () => {
                 <td className="p-6 text-emerald-500 font-black text-xs">S/ {parseFloat(p.total).toFixed(2)}</td>
                 
                 <td className="p-6">
-                  <button
-                    // Usamos la URL base de la instancia para mantener la coherencia
+                  <button                  
                     onClick={() => window.open(`${wayraApi.defaults.baseURL}/admin/boleta/${p.id_pedido}`, '_blank')}
                     className="bg-white/5 text-white p-3 rounded-xl hover:bg-white hover:text-black transition-all text-[9px] font-black uppercase tracking-tighter"
                   >
                     📄 Ver Boleta
                   </button>
                 </td>
-
                 <td className="p-6 text-right">
                   <span className="bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase">
                     PAGADO
