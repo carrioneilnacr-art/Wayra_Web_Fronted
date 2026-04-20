@@ -1,16 +1,13 @@
-/* src/modals/ModalBoleta/ModalBoleta.module.css */
 .overlay {
   background-color: rgba(45, 52, 54, 0.2);
   backdrop-filter: blur(8px);
 }
-
 .ticketContainer {
   background-color: #fcfaf7;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   position: relative;
   overflow: hidden;
 }
-
 .hankoStatus {
   border: 1px solid #121212;
   color: #121212;
@@ -22,7 +19,6 @@
   line-height: 1;
 }
 
-/* Estilo para que al imprimir no salgan los botones ni el fondo oscuro */
 @media print {
   .overlay { background: white !important; backdrop-filter: none !important; }
   .ticketContainer { box-shadow: none !important; border: none !important; }
