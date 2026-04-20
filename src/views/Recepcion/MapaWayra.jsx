@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import imagenMapa from "../../assets/mapa-final-wayra.png"; // Los dos "../" te sacan hasta "src"
+import imagenMapa from "../../assets/mapa-final-wayra.png"; 
 const MapaWayra = ({ mesas, onMesaClick, mesaSeleccionada }) => {
   const [ahora, setAhora] = useState(new Date());
   const [dimensiones, setDimensiones] = useState({ width: 0, height: 0 });
   const imgRef = useRef(null);
 
-  // Actualizar el timer de las mesas cada minuto
+  // timer de las mesas cada minuto
   useEffect(() => {
     const timer = setInterval(() => setAhora(new Date()), 60000);
     return () => clearInterval(timer);
   }, [ahora]);
-
   const actualizarEscala = () => {
     if (imgRef.current) {
       setDimensiones({
@@ -19,14 +18,11 @@ const MapaWayra = ({ mesas, onMesaClick, mesaSeleccionada }) => {
       });
     }
   };
-
   useEffect(() => {
     window.addEventListener('resize', actualizarEscala);
-    // Pequeño delay para asegurar que el DOM se asentó
     setTimeout(actualizarEscala, 100);
     return () => window.removeEventListener('resize', actualizarEscala);
   }, []);
-
   const calcularMinutos = (horaInicio) => {
     if (!horaInicio) return "0 min";
     const inicio = new Date(horaInicio);
@@ -34,7 +30,6 @@ const MapaWayra = ({ mesas, onMesaClick, mesaSeleccionada }) => {
     const mins = Math.floor(diffMs / 60000);
     return `${mins >= 0 ? mins : 0} min`;
   };
-
   const coordenadas = {
     1: { top: 45.3, left: 3.2, width: 11.4, height: 8.4 }, 
     2: { top: 45.2, left: 19.4, width: 11.4, height: 8.5 },
@@ -45,7 +40,6 @@ const MapaWayra = ({ mesas, onMesaClick, mesaSeleccionada }) => {
     7: { top: 83.8, left: 73, width: 9.9, height: 8.2 },
     8: { top: 83.8, left: 84.2, width: 9.9, height: 8.2 },
   };
-
   return (
     <div className="w-full h-full flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden p-4 custom-scrollbar bg-slate-100/50 rounded-[3rem]">
       <div className="relative inline-block w-full max-w-[1100px]">
@@ -126,5 +120,4 @@ const MapaWayra = ({ mesas, onMesaClick, mesaSeleccionada }) => {
     </div>
   );
 };
-
 export default MapaWayra;
