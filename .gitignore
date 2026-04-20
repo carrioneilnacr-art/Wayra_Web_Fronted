@@ -1,0 +1,30 @@
+# Dependencias (NUNCA subir esto, pesa demasiado)
+node_modules/
+dist/                # Los archivos que genera el build (no se suben)
+dist-ssr/
+*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Variables de Entorno (IMPORTANTE por seguridad)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor (Configuraciones de tu VS Code)
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Archivos de Sistema
+DS_Store
+Thumbs.db
