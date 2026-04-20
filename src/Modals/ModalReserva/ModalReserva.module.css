@@ -1,8 +1,7 @@
-/* src/modals/ModalReserva/ModalReserva.module.css */
 .overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(15, 23, 42, 0.9); /* slate-900/90 */
+  background-color: rgba(15, 23, 42, 0.9); 
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
@@ -10,22 +9,19 @@
   z-index: 2000;
   padding: 1rem;
 }
-
 .modalCard {
   background-color: white;
   width: 100%;
-  max-width: 32rem; /* max-w-lg */
+  max-width: 32rem; 
   border-radius: 3rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   padding: 2.5rem;
 }
-
 .gridTurnos {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
 }
-
 .turnoBtn {
   padding: 0.75rem;
   border-radius: 1rem;
@@ -36,24 +32,20 @@
   flex-direction: column;
   align-items: center;
 }
-
 .turnoDisponible {
   background-color: white;
   color: #64748b;
 }
-
 .turnoDisponible:hover {
   border-color: #bfdbfe;
 }
-
 .turnoSeleccionado {
-  background-color: #2563eb; /* blue-600 */
+  background-color: #2563eb; 
   border-color: #2563eb;
   color: white;
   transform: scale(1.05);
   box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
 }
-
 .turnoBloqueado {
   background-color: #f1f5f9;
   color: #cbd5e1;
