@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import wayraApi from '../../api/wayraApi'; // Instancia maestra
+import wayraApi from '../../api/wayraApi'; 
 
 export const ViewCarta = () => {
   const [productos, setProductos] = useState([]);
@@ -12,10 +12,8 @@ export const ViewCarta = () => {
     categoria: 'Entradas', 
     tiempo_estimado: 15 
   });
-
   const categorias = ["TODOS", "ENTRADAS", "MAKIS", "FONDOS", "BEBIDAS", "POSTRES"];
 
-  // 1. Cargar Carta con Axios
   const cargarCarta = async () => {
     try {
       const res = await wayraApi.get('/productos');
@@ -24,12 +22,10 @@ export const ViewCarta = () => {
       console.error("Error cargando carta:", e); 
     }
   };
-
   useEffect(() => { 
     cargarCarta(); 
   }, []);
 
-  // 2. Actualizar Producto (Estado o Precio) con Axios
   const handleUpdate = async (id, field, value) => {
     try {
       await wayraApi.put(`/admin/productos/${id}`, { [field]: value });
@@ -39,12 +35,10 @@ export const ViewCarta = () => {
     }
   };
 
-  // 3. Guardar Nuevo Producto con Axios
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      const res = await wayraApi.post('/admin/productos', { ...nuevoProd, estado: 1 });
-      
+      const res = await wayraApi.post('/admin/productos', { ...nuevoProd, estado: 1 }); 
       if (res.status === 200 || res.status === 201) {
         setMostrarForm(false);
         setNuevoProd({ nombre: '', precio: '', categoria: 'Entradas', tiempo_estimado: 15 });
@@ -79,7 +73,6 @@ export const ViewCarta = () => {
           + Agregar Producto
         </button>
       </header>
-
       {/* MODAL PARA AGREGAR PRODUCTO */}
       {mostrarForm && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
@@ -122,7 +115,6 @@ export const ViewCarta = () => {
           onChange={(e) => setBusqueda(e.target.value)}
         />
       </div>
-
       <div className="grid grid-cols-1 gap-4">
         {productos
           .filter(p => {
@@ -151,8 +143,7 @@ export const ViewCarta = () => {
                     className={`px-4 py-2 rounded-xl text-[8px] font-black border transition-all w-24 ${esDisponible ? 'border-emerald-500/50 text-emerald-500 bg-emerald-500/5' : 'border-rose-500/50 text-rose-500 bg-rose-500/5'}`}
                   >
                     {esDisponible ? 'DISPONIBLE' : 'AGOTADO'}
-                  </button>
-                  
+                  </button>                
                   <button 
                     onClick={() => {
                       const n = prompt("INGRESA EL NUEVO PRECIO PARA " + p.nombre, p.precio);
