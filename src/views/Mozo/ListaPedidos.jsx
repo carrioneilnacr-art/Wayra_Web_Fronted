@@ -1,17 +1,11 @@
 import React from 'react';
-import wayraApi from '../../api/wayraApi'; // Nuestra instancia maestra
+import wayraApi from '../../api/wayraApi'; 
 
 const ListaPedidos = ({ pedidos = [], onUpdate }) => {
-  
   const handlePagar = async (idPedido) => {
-    // 💡 Un pequeño confirm antes de cobrar por IZIPAY nunca está de más
     if (!window.confirm("¿Confirmas el cobro de esta mesa?")) return;
-
     try {
-      // Usamos wayraApi.put, ya no necesitamos pasar headers ni hacer JSON.stringify vacío
       const res = await wayraApi.put(`/pedidos/${idPedido}/pagar`);
-      
-      // Con Axios, si no hay error, ejecutamos el update
       if (res.status === 200) {
         onUpdate();
       }
@@ -20,7 +14,6 @@ const ListaPedidos = ({ pedidos = [], onUpdate }) => {
       alert("Hubo un problema al procesar el pago. Verifica la conexión.");
     }
   };
-
   if (!Array.isArray(pedidos) || pedidos.length === 0) {
     return (
       <div className="text-center opacity-30 mt-10 italic text-[10px] tracking-[0.3em] uppercase">
@@ -28,7 +21,6 @@ const ListaPedidos = ({ pedidos = [], onUpdate }) => {
       </div>
     );
   }
-
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
       {pedidos.map(pedido => (
@@ -59,5 +51,4 @@ const ListaPedidos = ({ pedidos = [], onUpdate }) => {
     </div>
   );
 };
-
 export default ListaPedidos;
