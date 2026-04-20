@@ -3,27 +3,24 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, Cell, AreaChart, Area 
 } from 'recharts';
-import wayraApi from '../../api/wayraApi'; // Instancia maestra
+import wayraApi from '../../api/wayraApi'; 
 
 export const ViewStats = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // 1. Cargar Métricas con Axios
   const cargarMetricas = async () => {
     try {
       const res = await wayraApi.get('/admin/metrics');
-      setData(res.data); // Axios ya parsea el JSON
+      setData(res.data); 
     } catch (e) { 
       console.error("Error al obtener métricas de Render:", e); 
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     cargarMetricas();
-    const interval = setInterval(cargarMetricas, 30000); // Auto-actualizar cada 30 seg
+    const interval = setInterval(cargarMetricas, 30000); 
     return () => clearInterval(interval);
   }, []);
 
@@ -32,7 +29,6 @@ export const ViewStats = () => {
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-600"></div>
     </div>
   );
-
   const COLORS = ['#2563eb', '#7c3aed', '#db2777', '#ea580c', '#16a34a'];
 
   return (
