@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import wayraApi from '../../api/wayraApi'; // Instancia maestra
+import wayraApi from '../../api/wayraApi'; 
 import ComanderoCarta from './ComanderoCarta';
 
 const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTicket }) => {
@@ -13,31 +13,26 @@ const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTicket }) 
   const [showAdd, setShowAdd] = useState(false);
   const [nuevaObs, setNuevaObs] = useState("");
   const [proximasReservas, setProximasReservas] = useState([]);
-
   const misPedidos = pedidos.filter(p => String(p.id_mozo) === String(userLogueado?.id_usuario) && p.estado_pedido !== 'PAGADO');
 
-  // 1. Cargar Reservas con Axios
   const cargarMisReservas = async () => {
     try {
       if (!userLogueado?.id_usuario) return;
       const res = await wayraApi.get(`/reservas/hoy?id_mozo=${userLogueado.id_usuario}`);
-      setProximasReservas(res.data); // Axios ya nos da el JSON en .data
+      setProximasReservas(res.data); 
     } catch (e) { 
       console.error("Error cargando reservas del mozo:", e); 
     }
   };
-
   useEffect(() => {
     const t = setInterval(() => setAhora(new Date()), 10000);
     cargarMisReservas();
     return () => clearInterval(t);
   }, [userLogueado]);
-
   useEffect(() => {
     if (pedidoSel) setNuevaObs(pedidoSel.observacion || "");
   }, [pedidoSel]);
 
-  // 2. Eliminar Plato con Axios
   const eliminarPlato = async (idDetalle) => {
     if (!window.confirm("¿Eliminar este plato del pedido?")) return;
     try {
@@ -48,7 +43,6 @@ const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTicket }) 
       console.error("No se pudo eliminar el plato:", e); 
     }
   };
-
   const generarTicketPDF = (pedido, tipoDoc) => {
     const doc = new jsPDF({ format: [80, 180] });
     const ancho = 80;
@@ -63,8 +57,7 @@ const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTicket }) 
     doc.text("--------------------------------", ancho/2, 34, {align:'center'});
     doc.text(`FECHA: ${new Date().toLocaleDateString()}`, 5, 39);
     doc.text(`CLIENTE: ${clienteExtra.nombre}`, 5, 43);
-    doc.text(`DOC: ${clienteExtra.documento}`, 5, 47);
-    
+    doc.text(`DOC: ${clienteExtra.documento}`, 5, 47);    
     const body = pedido.items.map(i => [i.cantidad, i.nombre.substring(0,18), `S/${parseFloat(i.subtotal).toFixed(2)}`]);
     autoTable(doc, {
       startY: 52, body: body, head: [['CANT', 'DESC', 'SUB']],
@@ -78,7 +71,6 @@ const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTicket }) 
     onShowTicket(doc.output('bloburl'));
   };
 
-  // 3. Finalizar Pago con Axios
   const finalizarPago = async (tipoDoc) => {
     const docLen = clienteExtra.documento.length;
     if (tipoDoc === 'BOLETA' && docLen !== 8) return alert("❌ DNI INVÁLIDO (8 DÍGITOS)");
@@ -219,5 +211,4 @@ const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTicket }) 
     </div>
   );
 };
-
 export default MonitorPedidos;
