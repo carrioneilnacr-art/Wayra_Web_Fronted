@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import MapaWayra from "../views/Recepcion/MapaWayra"; 
 
 // 2. Apunta a la nueva carpeta raíz de modals (con M mayúscula)
-import ModalReserva from "../../modals/ModalReserva/ModalReserva"; 
+import ModalReserva from "../modals/ModalReserva/ModalReserva";
 
 // 3. PanelDerecho se quedó en components/Recepcion según tu imagen
 import { PanelDerechoReservas } from "../components/Recepcion/PanelDerecho"; 
