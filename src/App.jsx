@@ -3,8 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./pages/Login";
 import DashboardRecepcion from "./pages/DashboardRecepcion";
 import DashboardMozo from "./pages/DashboardMozo";
-import DashboardAdmin from "./pages/DashboardAdmin"; // Importar el nuevo panel
-
+import DashboardAdmin from "./pages/DashboardAdmin"; 
 function App() {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem("usuario_wayra");
@@ -21,7 +20,6 @@ function App() {
     setUser(null);
   };
 
-  // Función para determinar a dónde enviar a cada usuario según su rol
   const getRedirectPath = (rol) => {
     switch (rol) {
       case "admin": return "/admin";
