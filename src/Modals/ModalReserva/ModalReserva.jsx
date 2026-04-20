@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import wayraApi from '../../api/wayraApi'; // Instancia de Axios
+import wayraApi from '../../api/wayraApi'; 
 import styles from './ModalReserva.module.css';
 
 const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSeleccionada, reservaEdit }) => {
@@ -14,18 +14,14 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSelecciona
     observacion: reservaEdit?.observacion || '',
     id_mozo: reservaEdit?.id_mozo || null 
   });
-
   const turnos = [
     { id: 1, label: 'T1', hora: '12:00' }, { id: 2, label: 'T2', hora: '14:05' },
     { id: 3, label: 'T3', hora: '16:10' }, { id: 4, label: 'T4', hora: '18:15' },
     { id: 5, label: 'T5', hora: '20:20' }, { id: 6, label: 'T6', hora: '22:25' },
   ];
-
   const hoyStr = new Date().toLocaleDateString('en-CA');
   const ahora = new Date();
   const horaActualNum = ahora.getHours() * 100 + ahora.getMinutes();
-
-  // Lógica de filtrado de turnos
   const turnosOcupados = todasLasReservas
     .filter(r => {
       const mismaMesa = parseInt(r.id_mesa) === parseInt(form.id_mesa);
@@ -35,17 +31,13 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSelecciona
       return mismaMesa && mismaFecha && noEsLaMismaQueEdito && noEstaCancelada;
     })
     .map(r => r.hora_reserva.substring(0, 5));
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.hora_reserva) return alert("Selecciona un turno");
-
-    // Lógica de asignación de mozo con Axios
     if (!reservaEdit && form.fecha_reserva === hoyStr) {
       try {
         const resMozo = await wayraApi.get('/asignar-mozo');
-        const dataMozo = resMozo.data; // Axios ya parsea el JSON
-        
+        const dataMozo = resMozo.data; 
         if (dataMozo.success) {
           alert(`Mozo asignado: ${dataMozo.mozo.nombre}`);
           onSave({ ...form, id_mozo: dataMozo.mozo.id_usuario });
@@ -60,7 +52,6 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSelecciona
       onSave(form);
     }
   };
-
   return (
     <div className={`${styles.overlay} uppercase italic font-black`}>
       <div className={`${styles.modalCard} animate-in zoom-in duration-300`}>
@@ -70,7 +61,6 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSelecciona
             {form.fecha_reserva === hoyStr ? 'ATENCIÓN INMEDIATA ⚡' : 'RESERVA PROGRAMADA 📅'}
           </div>
         </header>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="relative">
@@ -83,8 +73,7 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSelecciona
                 required 
               />
               {form.dni_cliente.length === 8 && <span className="absolute right-3 top-4 text-emerald-500 text-[8px]">✅</span>}
-            </div>
-            
+            </div>          
             <input 
               type="text" 
               placeholder="CELULAR" 
@@ -94,7 +83,6 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSelecciona
               required 
             />
           </div>
-
           <input 
             type="text" 
             placeholder="NOMBRE COMPLETO" 
@@ -103,7 +91,6 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSelecciona
             onChange={e => setForm({...form, nombre_cliente: e.target.value.toUpperCase()})} 
             required 
           />
-
           <div className="py-2">
             <p className="text-[9px] text-slate-400 mb-3 tracking-widest text-center">
               HORARIOS MESA {mesa.id_mesa || mesa.numero_mesa}
@@ -114,7 +101,6 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSelecciona
                 const ocupado = turnosOcupados.includes(t.hora);
                 const yaPaso = form.fecha_reserva === hoyStr && horaTurnoNum < horaActualNum;
                 const bloqueado = ocupado || yaPaso;
-
                 return (
                   <button 
                     key={t.id} 
@@ -143,11 +129,9 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSelecciona
             value={form.observacion} 
             onChange={e => setForm({...form, observacion: e.target.value})}
           />
-
           <button type="submit" className="w-full bg-slate-900 text-white py-5 rounded-3xl text-[11px] hover:bg-blue-600 transition-all shadow-xl font-black italic tracking-widest">
             {reservaEdit ? 'ACTUALIZAR TICKET' : 'CONFIRMAR Y FINALIZAR'}
-          </button>
-          
+          </button>     
           <button type="button" onClick={onClose} className="w-full text-slate-300 text-[9px] mt-2 uppercase font-bold">
             Cerrar sin guardar
           </button>
@@ -156,5 +140,4 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSelecciona
     </div>
   );
 };
-
 export default ModalReserva;
