@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import wayraApi from '../../api/wayraApi'; // Instancia maestra
-
+import wayraApi from '../../api/wayraApi'; 
 const ComanderoCarta = ({ mesa, onClose, onSuccess, isEditing = false, userLogueado }) => {
   const [productos, setProductos] = useState([]);
   const [cat, setCat] = useState('MAKIS');
@@ -10,7 +9,6 @@ const ComanderoCarta = ({ mesa, onClose, onSuccess, isEditing = false, userLogue
   
   const categorias = ['ENTRADAS', 'FONDOS', 'MAKIS', 'POSTRES', 'BEBIDAS'];
 
-  // 1. Cargar productos con Axios
   useEffect(() => {
     const cargarProductos = async () => {
       try {
@@ -22,7 +20,6 @@ const ComanderoCarta = ({ mesa, onClose, onSuccess, isEditing = false, userLogue
     };
     cargarProductos();
   }, []);
-
   const agregar = (p) => {
     const existe = carrito.find(i => i.id_producto === p.id_producto);
     if (existe) {
@@ -32,7 +29,6 @@ const ComanderoCarta = ({ mesa, onClose, onSuccess, isEditing = false, userLogue
       setCarrito([...carrito, { ...p, cantidad: 1, subtotal: p.precio }]);
     }
   };
-
   const quitarUno = (id) => {
     const item = carrito.find(i => i.id_producto === id);
     if (item.cantidad > 1) {
@@ -43,14 +39,11 @@ const ComanderoCarta = ({ mesa, onClose, onSuccess, isEditing = false, userLogue
     }
   };
 
-  // 2. Enviar Comanda con Axios
   const enviar = async () => {
     if (carrito.length === 0) return alert("Selecciona al menos un plato");
     setEnviando(true);
     try {
       if (isEditing) {
-        // Optimización: Usar Promise.all para enviar items en paralelo si la API lo permite,
-        // o mantener el flujo controlado con wayraApi.
         const promesas = carrito.map(item => 
           wayraApi.post(`/pedidos/${mesa.id_pedido}/agregar`, item)
         );
@@ -128,7 +121,6 @@ const ComanderoCarta = ({ mesa, onClose, onSuccess, isEditing = false, userLogue
               </div>
             ))}
           </div>
-
           {!isEditing && (
             <textarea 
               placeholder="Nota para cocina..."
@@ -136,8 +128,7 @@ const ComanderoCarta = ({ mesa, onClose, onSuccess, isEditing = false, userLogue
               value={nota}
               onChange={(e) => setNota(e.target.value)}
             />
-          )}
-          
+          )}      
           <button 
             onClick={enviar} 
             disabled={enviando} 
@@ -150,5 +141,4 @@ const ComanderoCarta = ({ mesa, onClose, onSuccess, isEditing = false, userLogue
     </div>
   );
 };
-
 export default ComanderoCarta;
