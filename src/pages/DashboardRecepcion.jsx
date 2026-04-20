@@ -3,13 +3,13 @@ import React, { useState, useEffect } from 'react';
 import MapaWayra from "../views/Recepcion/MapaWayra"; 
 
 // 2. Apunta a la nueva carpeta raíz de modals (con M mayúscula)
-import ModalReserva from "../modals/ModalReserva/ModalReserva";
+import ModalReserva from "../Modals/ModalReserva/ModalReserva";
 
 // 3. PanelDerecho se quedó en components/Recepcion según tu imagen
 import { PanelDerechoReservas } from "../components/Recepcion/PanelDerecho"; 
 
 // 4. EL ERROR PRINCIPAL: ModalesRecepcion ahora está en su propia carpeta dentro de /modals
-import { ModalDetalleTicket } from "../modals/ModalRecepcion/ModalesRecepcion";
+import { ModalDetalleTicket } from "../Modals/ModalRecepcion/ModalesRecepcion";
 
 // COMPONENTE DE REPORTE DE OCUPACIÓN
 const ReporteOcupacion = ({ reservas, totalMesas }) => {
