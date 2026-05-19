@@ -157,19 +157,46 @@ const DashboardRecepcion = ({ onLogout }) => {
                   <button onClick={() => setFechaNav(p => ({...p, mes: p.mes+1}))} className="p-4 bg-slate-50 rounded-full hover:bg-slate-100">❯</button>
                </div>
                {[...Array(offset + diasMes)].map((_, i) => {
-                  const d = i - offset + 1;
-                  if (d <= 0) return <div key={i} />;
-                  const fStr = `${fechaNav.año}-${String(fechaNav.mes + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                  const tks = reservas.filter(r => r.fecha_reserva?.split('T')[0] === fStr && r.estado_reserva !== 'cancelada');
-                  return (
-                    <div key={i} onClick={() => { setFechaSeleccionada(fStr); setPestaña('hoy'); }}
-                      className={`h-24 border-2 rounded-[2.5rem] p-4 flex flex-col justify-between cursor-pointer transition-all hover:scale-105 ${fStr === hoyStr ? 'border-emerald-500 bg-emerald-50/30 shadow-md' : fStr === fechaSeleccionada ? 'border-blue-600 bg-blue-50' : 'border-slate-50 opacity-40'}`}
-                    >
-                      <span className="font-black text-xl">{d}</span>
-                      {tks.length > 0 && <span className="bg-blue-600 text-white text-[8px] font-black px-2 py-1 rounded-lg text-center">{tks.length} TK</span>}
-                    </div>
-                  );
-               })}
+                const d = i - offset + 1;
+                if (d <= 0) return <div key={i} />;
+                
+                // Formato estandarizado de la fecha del día actual del bucle
+                const fStr = `${fechaNav.año}-${String(fechaNav.mes + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+              
+                // REGLA DE NEGOCIO: Validamos si el día ya pasó
+                const esPasado = fStr < hoyStr;              
+                const tks = reservas.filter(r => r.fecha_reserva?.split('T')[0] === fStr && r.estado_reserva !== 'cancelada');              
+                return (
+                  <div 
+                    key={i} 
+                    onClick={() => { 
+                      // Si es pasado, bloqueamos la acción de selección
+                      if (esPasado) return; 
+                      setFechaSeleccionada(fStr); 
+                      setPestaña('hoy'); 
+                    }}
+                    className={`h-24 border-2 rounded-[2.5rem] p-4 flex flex-col justify-between transition-all ${
+                      esPasado 
+                        ? 'border-slate-100 bg-slate-50/50 opacity-10 cursor-not-allowed pointer-events-none' // Bloqueado total
+                        : fStr === hoyStr 
+                          ? 'border-emerald-500 bg-emerald-50/30 shadow-md cursor-pointer hover:scale-105' // Hoy
+                          : fStr === fechaSeleccionada 
+                            ? 'border-blue-600 bg-blue-50 cursor-pointer hover:scale-105' // Seleccionado
+                            : 'border-slate-100 bg-white cursor-pointer hover:scale-105 opacity-100' // Futuros disponibles
+                    }`}
+                  >
+                    {/* Número del día con estilo atenuado si ya pasó */}
+                    <span className={`font-black text-xl ${esPasado ? 'text-slate-300' : 'text-slate-800'}`}>{d}</span>
+                    
+                    {/* Mostrar la etiqueta de Tickets solo si tiene órdenes y NO es un día pasado */}
+                    {tks.length > 0 && !esPasado && (
+                      <span className="bg-blue-600 text-white text-[8px] font-black px-2 py-1 rounded-lg text-center animate-in zoom-in duration-300">
+                        {tks.length} TK
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
