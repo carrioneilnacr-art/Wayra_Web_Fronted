@@ -17,7 +17,7 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSelecciona
   const turnos = [
     { id: 1, label: 'T1', hora: '12:00' }, { id: 2, label: 'T2', hora: '14:05' },
     { id: 3, label: 'T3', hora: '16:10' }, { id: 4, label: 'T4', hora: '18:15' },
-    { id: 5, label: 'T5', hora: '21:14' }, { id: 6, label: 'T6', hora: '22:25' },
+    { id: 5, label: 'T5', hora: '21:20' }, { id: 6, label: 'T6', hora: '22:25' },
   ];
   const hoyStr = new Date().toLocaleDateString('en-CA');
   const ahora = new Date();
