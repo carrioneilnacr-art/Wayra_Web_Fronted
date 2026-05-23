@@ -13,7 +13,7 @@ import { ModalDetalleTicket } from "../Modals/ModalRecepcion/ModalesRecepcion";
 
 // COMPONENTE DE REPORTE DE OCUPACIÓN
 const ReporteOcupacion = ({ reservas, totalMesas }) => {
-  const turnos = ['12:00', '14:05', '16:10', '18:15', '20:20', '22:25'];
+  const turnos = ['12:00', '3:35', '16:10', '18:15', '20:20', '22:25'];
   
   return (
     <div className="grid grid-cols-6 gap-2 mb-6 w-full max-w-5xl animate-in fade-in slide-in-from-left duration-700">
