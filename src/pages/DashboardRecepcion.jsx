@@ -13,7 +13,7 @@ import { ModalDetalleTicket } from "../Modals/ModalRecepcion/ModalesRecepcion";
 
 // COMPONENTE DE REPORTE DE OCUPACIÓN
 const ReporteOcupacion = ({ reservas, totalMesas }) => {
-  const turnos = ['12:00', '03:35', '3:40', '18:15', '20:20', '22:25'];
+  const turnos = ['03:40', '03:42', '3:45', '18:15', '20:20', '22:25'];
   
   return (
     <div className="grid grid-cols-6 gap-2 mb-6 w-full max-w-5xl animate-in fade-in slide-in-from-left duration-700">
@@ -24,7 +24,7 @@ const ReporteOcupacion = ({ reservas, totalMesas }) => {
         return (
           <div key={t} className="bg-white p-3 rounded-[1.8rem] shadow-sm border border-slate-100 flex flex-col items-center">
             <span className="text-[7px] font-black text-slate-400">TURNO {i+1}</span>
-            <span className="text-[9px] font-black my-0.5">{t}</span>
+            <span className="text-[9px] font-black my-0.5">{t} AM</span>
             <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
               <div 
                 className={`h-full transition-all duration-1000 ${porcentaje > 80 ? 'bg-rose-500' : 'bg-blue-600'}`}
