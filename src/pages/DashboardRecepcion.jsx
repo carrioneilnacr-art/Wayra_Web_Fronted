@@ -11,20 +11,36 @@ import { PanelDerechoReservas } from "../components/Recepcion/PanelDerecho";
 // 4. EL ERROR PRINCIPAL: ModalesRecepcion ahora está en su propia carpeta dentro de /modals
 import { ModalDetalleTicket } from "../Modals/ModalRecepcion/ModalesRecepcion";
 
-// COMPONENTE DE REPORTE DE OCUPACIÓN
+// =========================================================================
+// COMPONENTE DE REPORTE DE OCUPACIÓN (CORREGIDO PARA FILTRADO DE MADRUGADA)
+// =========================================================================
 const ReporteOcupacion = ({ reservas, totalMesas }) => {
-  const turnos = ['03:40', '03:42', '3:45', '18:15', '20:20', '22:25'];
+  // Configuración de turnos aislando el ID de consulta de la etiqueta visual
+  const turnosConfig = [
+    { id: '03:40', etiqueta: '03:40 AM', turno: 'TURNO 1' },
+    { id: '03:42', etiqueta: '03:42 AM', turno: 'TURNO 2' },
+    { id: '03:45', etiqueta: '03:45 AM', turno: 'TURNO 3' },
+    { id: '18:15', etiqueta: '18:15 PM', turno: 'TURNO 4' },
+    { id: '20:20', etiqueta: '20:20 PM', turno: 'TURNO 5' },
+    { id: '22:25', etiqueta: '22:25 PM', turno: 'TURNO 6' }
+  ];
   
   return (
     <div className="grid grid-cols-6 gap-2 mb-6 w-full max-w-5xl animate-in fade-in slide-in-from-left duration-700">
-      {turnos.map((t, i) => {
-        const ocupadas = reservas.filter(r => r.hora_reserva.startsWith(t) && r.estado_reserva !== 'cancelada').length;
-        const porcentaje = (ocupadas / totalMesas) * 100;
+      {turnosConfig.map((t) => {
+        // Filtramos usando el ID exacto que coincide con los primeros caracteres de hora_reserva
+        const ocupadas = reservas.filter(r => 
+          r.hora_reserva && 
+          r.hora_reserva.startsWith(t.id) && 
+          r.estado_reserva !== 'cancelada'
+        ).length;
+        
+        const porcentaje = totalMesas > 0 ? (ocupadas / totalMesas) * 100 : 0;
         
         return (
-          <div key={t} className="bg-white p-3 rounded-[1.8rem] shadow-sm border border-slate-100 flex flex-col items-center">
-            <span className="text-[7px] font-black text-slate-400">TURNO {i+1}</span>
-            <span className="text-[9px] font-black my-0.5">{t} AM</span>
+          <div key={t.id} className="bg-white p-3 rounded-[1.8rem] shadow-sm border border-slate-100 flex flex-col items-center">
+            <span className="text-[7px] font-black text-slate-400">{t.turno}</span>
+            <span className="text-[9px] font-black my-0.5">{t.etiqueta}</span>
             <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
               <div 
                 className={`h-full transition-all duration-1000 ${porcentaje > 80 ? 'bg-rose-500' : 'bg-blue-600'}`}
@@ -39,6 +55,9 @@ const ReporteOcupacion = ({ reservas, totalMesas }) => {
   );
 };
 
+// =========================================================================
+// COMPONENTE PRINCIPAL: DASHBOARD RECEPCIÓN
+// =========================================================================
 const DashboardRecepcion = ({ onLogout }) => { 
   const [mesas, setMesas] = useState([]);
   const [reservas, setReservas] = useState([]);
@@ -157,47 +176,52 @@ const DashboardRecepcion = ({ onLogout }) => {
                   <button onClick={() => setFechaNav(p => ({...p, mes: p.mes+1}))} className="p-4 bg-slate-50 rounded-full hover:bg-slate-100">❯</button>
                </div>
               {[...Array(offset + diasMes)].map((_, i) => {
-              const d = i - offset + 1;
-              if (d <= 0) return <div key={i} />;
-              
-              // Formato de fecha para el día actual del bucle
-              const fStr = `${fechaNav.año}-${String(fechaNav.mes + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-              
-              // Condición estricta: si el día es menor que hoy, ya pasó
-              const esPasado = fStr < hoyStr;
-            
-              const tks = reservas.filter(r => r.fecha_reserva?.split('T')[0] === fStr && r.estado_reserva !== 'cancelada');
-              
-              return (
-                <div 
-                  key={i} 
-                  onClick={() => { 
-                    if (esPasado) return; // Candado lógico en JS
-                    setFechaSeleccionada(fStr); 
-                    setPestaña('hoy'); 
-                  }}
-                  className={`h-24 border-2 rounded-[2.5rem] p-4 flex flex-col justify-between transition-all ${
-                    esPasado 
-                      ? 'border-slate-100 bg-slate-100/50 text-slate-300 cursor-not-allowed pointer-events-none select-none' // GRIS BLOQUEADO: visible pero inerte
-                      : fStr === hoyStr 
-                        ? 'border-emerald-500 bg-emerald-50/30 shadow-md cursor-pointer hover:scale-105 text-slate-800' // Día actual (Verde)
-                        : fStr === fechaSeleccionada 
-                          ? 'border-blue-600 bg-blue-50 cursor-pointer hover:scale-105 text-slate-800' // Seleccionado (Azul)
-                          : 'border-slate-100 bg-white cursor-pointer hover:scale-105 text-slate-800' // Días futuros activos
-                  }`}
-                >
-                  {/* El número del día cambia a un gris claro si ya pasó */}
-                  <span className={`font-black text-xl ${esPasado ? 'text-slate-300' : 'text-slate-800'}`}>{d}</span>
-                  
-                  {/* Ocultamos las etiquetas de tickets viejos para no saturar visualmente el pasado */}
-                  {tks.length > 0 && !esPasado && (
-                    <span className="bg-blue-600 text-white text-[8px] font-black px-2 py-1 rounded-lg text-center">
-                      {tks.length} TK
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+                const d = i - offset + 1;
+                if (d <= 0) return <div key={i} />;
+                
+                const fStr = `${fechaNav.año}-${String(fechaNav.mes + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                
+                // CONTROL DE MADRUGADA: Si operamos entre 00:00 y 05:00 AM, habilitamos el día anterior
+                const horaActual = new Date().getHours();
+                let fechaLimiteControl = hoyStr;
+                
+                if (horaActual >= 0 && horaActual < 5) {
+                  const ayer = new Date();
+                  ayer.setDate(ayer.getDate() - 1);
+                  fechaLimiteControl = ayer.toLocaleDateString('en-CA');
+                }
+
+                const esPasado = fStr < fechaLimiteControl;
+                const tks = reservas.filter(r => r.fecha_reserva?.split('T')[0] === fStr && r.estado_reserva !== 'cancelada');
+                
+                return (
+                  <div 
+                    key={i} 
+                    onClick={() => { 
+                      if (esPasado) return; 
+                      setFechaSeleccionada(fStr); 
+                      setPestaña('hoy'); 
+                    }}
+                    className={`h-24 border-2 rounded-[2.5rem] p-4 flex flex-col justify-between transition-all ${
+                      esPasado 
+                        ? 'border-slate-100 bg-slate-100/50 text-slate-300 cursor-not-allowed pointer-events-none select-none' 
+                        : fStr === hoyStr 
+                          ? 'border-emerald-500 bg-emerald-50/30 shadow-md cursor-pointer hover:scale-105 text-slate-800' 
+                          : fStr === fechaSeleccionada 
+                            ? 'border-blue-600 bg-blue-50 cursor-pointer hover:scale-105 text-slate-800' 
+                            : 'border-slate-100 bg-white cursor-pointer hover:scale-105 text-slate-800' 
+                    }`}
+                  >
+                    <span className={`font-black text-xl ${esPasado ? 'text-slate-300' : 'text-slate-800'}`}>{d}</span>
+                    
+                    {tks.length > 0 && !esPasado && (
+                      <span className="bg-blue-600 text-white text-[8px] font-black px-2 py-1 rounded-lg text-center">
+                        {tks.length} TK
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
