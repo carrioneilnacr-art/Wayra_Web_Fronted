@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import wayraApi from '../api/wayraApi'; // Importamos tu instancia configurada de Axios
+import { ejecutarCierreSesionGlobal } from '../../helpers/logoutHelper'; 
 import { ViewStats } from "../views/Admin/ViewStats"; 
 import { ViewCarta } from "../views/Admin/ViewCarta";
 import { ViewUsuarios } from "../views/Admin/ViewUsuarios";
@@ -7,23 +7,6 @@ import { ViewHistorial } from "../views/Admin/ViewHistorial";
 
 const DashboardAdmin = ({ onLogout, user }) => {
   const [seccion, setSeccion] = useState('stats');
-
-  // 🔓 MANEJADOR DE DESCONEXIÓN TRANSACCIONAL EN CALIENTE
-  const manejarCierreSesion = async () => {
-    try {
-      // Si el usuario existe y tiene un ID válido, le avisamos a Render para que lo pase a offline en Railway
-      if (user && user.id_usuario) {
-        await wayraApi.post('/logout', { id_usuario: user.id_usuario });
-      }
-    } catch (error) {
-      console.error("❌ Error al notificar el cierre de sesión al backend:", error);
-    } finally {
-      // Limpieza de seguridad local y ejecución del logout heredado del AuthContext/App
-      localStorage.clear();
-      sessionStorage.clear();
-      onLogout();
-    }
-  };
 
   return (
     <div className="flex h-screen bg-[#f4f1ea] font-['Montserrat'] overflow-hidden">
@@ -111,9 +94,9 @@ const DashboardAdmin = ({ onLogout, user }) => {
           ))}
         </nav>
 
-        {/* 🚪 BOTÓN DE CIERRE DE SESIÓN VINCULADO CON EL ENTE OPERATIVO */}
+        {/* 🚪 BOTÓN DE CIERRE DE SESIÓN CENTRALIZADO */}
         <button 
-          onClick={manejarCierreSesion} 
+          onClick={() => ejecutarCierreSesionGlobal(user, onLogout)} 
           className="mt-auto pt-4 border-t border-white/5 flex items-center gap-4 text-slate-500 hover:text-[#d9534f] text-[9px] tracking-[0.2em] uppercase transition-all font-medium px-4 text-left group"
         >
           <svg className="w-4 h-4 transition-colors group-hover:text-[#d9534f]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
@@ -125,8 +108,6 @@ const DashboardAdmin = ({ onLogout, user }) => {
 
       {/* 🍽️ ÁREA DE CONTENIDO PRINCIPAL */}
       <main className="flex-1 overflow-y-auto p-8 md:p-14 relative bg-[#f4f1ea]">
-        
-        {/* VISTAS DINÁMICAS */}
         <div className="animate-in fade-in zoom-in-98 duration-300 pt-2">
           {seccion === 'stats' && <ViewStats />}
           {seccion === 'carta' && <ViewCarta />}
