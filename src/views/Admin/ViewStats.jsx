@@ -41,7 +41,8 @@ export const ViewStats = () => {
       {/* HEADER MINIMALISTA */}
       <header className="border-b border-slate-200 pb-4 flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-black text-[#1F497D] tracking-tight uppercase">Dashboard</h2>
+          <h2 className="text-3xl font-black text-[#1F497D] tracking-tight uppercase">Dashboard Gerencial</h2>
+          <p className="text-[10px] text-[#7F8C8D] font-black tracking-[0.3em] mt-1">PATRIMONIO NIKKEI — LIMA / TOKYO</p>
         </div>
         <div className="text-right">
           <span className="text-[10px] bg-[#1F497D] text-white font-bold px-3 py-1 rounded-full uppercase tracking-wider">Nivel: Admin</span>
@@ -50,14 +51,14 @@ export const ViewStats = () => {
 
       {/* CARDS KPI - DISEÑO MODULAR BLANCO LIMPIO */}
       <div className="grid grid-cols-3 gap-6">
-        {/* ÓRDENES */}
+        {/* ÓRDENES HISTÓRICAS TOTALES */}
         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
           <div className="flex justify-between items-center mb-2">
-            <p className="text-[11px] font-black text-[#7F8C8D] tracking-wider uppercase">Órdenes</p>
-            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">↑ 8% vs ayer</span>
+            <p className="text-[11px] font-black text-[#7F8C8D] tracking-wider uppercase">Órdenes Totales</p>
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Histórico</span>
           </div>
-          <h3 className="text-4xl font-black text-[#1F497D]">{data.kpis?.pedidos || 0}</h3>
-          <p className="text-[9px] text-[#7F8C8D] mt-2 font-medium">Transacciones procesadas en el turno</p>
+          <h3 className="text-4xl font-black text-[#1F497D]">{data.kpis?.totalPedidosHistoricos || 0}</h3>
+          <p className="text-[9px] text-[#7F8C8D] mt-2 font-medium">Volumen total de comandas en el sistema</p>
         </div>
         
         {/* TICKET PROMEDIO */}
@@ -123,33 +124,45 @@ export const ViewStats = () => {
         </div>
       </div>
 
-      {/* FOOTER: RANKING Y BLOQUE DE INSIGHTS / ALERTAS */}
+      {/* FOOTER: RANKING Y BLOQUE DE INSIGHTS / ALERTAS REACTIVOS */}
       <div className="grid grid-cols-5 gap-6 items-start">
         
-        {/* COMPONENTE DE SEGUIMIENTO TRANSACCIONAL (INSIGHTS Y ALERTAS) */}
+        {/* COMPONENTE DE SEGUIMIENTO TRANSACCIONAL REACTIVO */}
         <div className="col-span-2 space-y-4">
           
           {/* INSIGHT COMPLIANCE (VERDE DE CONFIRMACIÓN) */}
-          <div className="bg-[#E8F8F5] border border-[#A3E4D7] p-5 rounded-2xl flex items-start space-x-3">
-            <div className="mt-0.5 text-[#117A65]">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          {data.notificaciones?.insight && (
+            <div className="bg-[#E8F8F5] border border-[#A3E4D7] p-5 rounded-2xl flex items-start space-x-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mt-0.5 text-[#117A65]">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-xs font-black text-[#117A65] uppercase tracking-wider mb-1">Insight Clave</h4>
+                <p className="text-xs text-[#16A085] font-semibold leading-relaxed">
+                  {data.notificaciones.insight}
+                </p>
+              </div>
             </div>
-            <div>
-              <h4 className="text-xs font-black text-[#117A65] uppercase tracking-wider mb-1">Insight Clave</h4>
-              <p className="text-xs text-[#16A085] font-semibold leading-relaxed">El 60% de ingresos proviene de 3 platos principales. Considera promocionar estas opciones en el mapa dinámico.</p>
-            </div>
-          </div>
+          )}
 
-          {/* CRITICAL ALERT */}
-          <div className="bg-[#FADBD8] border border-[#F5B7B1] p-5 rounded-2xl flex items-start space-x-3">
-            <div className="mt-0.5 text-[#78281F]">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          {/* CRITICAL ALERT (ROJO) */}
+          {data.notificaciones?.alerta && (
+            <div className="bg-[#FADBD8] border border-[#F5B7B1] p-5 rounded-2xl flex items-start space-x-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mt-0.5 text-[#78281F]">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-xs font-black text-[#78281F] uppercase tracking-wider mb-1">Alerta del Sistema</h4>
+                <p className="text-xs text-[#943126] font-semibold leading-relaxed">
+                  {data.notificaciones.alerta}
+                </p>
+              </div>
             </div>
-            <div>
-              <h4 className="text-xs font-black text-[#78281F] uppercase tracking-wider mb-1">Alerta del Sistema</h4>
-              <p className="text-xs text-[#943126] font-semibold leading-relaxed">Las ventas bajaron un 20% en el horario de tarde. Revisa la asignación de mesas y flujo operativo.</p>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* TABLA DE RENDIMIENTO DEL STAFF (3 COLUMNAS COMPACTAS) */}
