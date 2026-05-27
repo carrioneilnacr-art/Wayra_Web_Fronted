@@ -41,8 +41,8 @@ export const ViewStats = () => {
       {/* HEADER MINIMALISTA */}
       <header className="border-b border-slate-200 pb-4 flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-black text-[#1F497D] tracking-tight uppercase">Dashboard Gerencial</h2>
-          <p className="text-[10px] text-[#7F8C8D] font-black tracking-[0.3em] mt-1">PATRIMONIO NIKKEI — LIMA / TOKYO</p>
+          <h2 className="text-3xl font-black text-[#1F497D] tracking-tight uppercase">Dashboard</h2>
+
         </div>
         <div className="text-right">
           <span className="text-[10px] bg-[#1F497D] text-white font-bold px-3 py-1 rounded-full uppercase tracking-wider">Nivel: Admin</span>
