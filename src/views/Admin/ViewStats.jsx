@@ -41,7 +41,7 @@ export const ViewStats = () => {
       {/* HEADER MINIMALISTA */}
       <header className="border-b border-slate-200 pb-4 flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-black text-[#1F497D] tracking-tight uppercase">Dashboard</h2>
+          <h2 className="text-3xl font-black text-[#1F497D] tracking-tight uppercase">Dashboard Proceso de Servicios</h2>
 
         </div>
         <div className="text-right">
