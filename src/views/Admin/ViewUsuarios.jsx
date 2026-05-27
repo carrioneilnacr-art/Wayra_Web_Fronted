@@ -7,7 +7,7 @@ export const ViewUsuarios = () => {
   const [usuarioEditar, setUsuarioEditar] = useState(null); 
   const [nuevoUsuario, setNuevoUsuario] = useState({ nombre: '', usuario: '', password: '', rol: 'mozo' });
 
-  // 1. CARGAR USUARIOS
+  // 1. CARGAR USUARIOS DESDE API (Trae subconsultas calculadas por Express)
   const cargarUsuarios = async () => {
     try {
       const res = await wayraApi.get('/admin/usuarios');
@@ -19,6 +19,9 @@ export const ViewUsuarios = () => {
 
   useEffect(() => { 
     cargarUsuarios(); 
+    // Refresco sutil cada 15 segundos para mantener las ID Cards sincronizadas con las acciones vivas
+    const interval = setInterval(cargarUsuarios, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   // 2. GUARDAR NUEVO
@@ -74,7 +77,7 @@ export const ViewUsuarios = () => {
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         );
-      default: // Mozo / Corredor
+      default: // Mozo
         return (
           <svg className="w-5 h-5 text-[#b07d62]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -86,7 +89,7 @@ export const ViewUsuarios = () => {
   return (
     <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-6 text-[#2C3E50]">
       
-      {/* ACCIÓN SUPERIOR ALINEADA (SIN TÍTULO DUPLICADO) */}
+      {/* ACCIÓN SUPERIOR ALINEADA */}
       <header className="flex justify-end items-center w-full">
         <button 
           onClick={() => setMostrarForm(true)} 
@@ -96,45 +99,99 @@ export const ViewUsuarios = () => {
         </button>
       </header>
 
-      {/* GRID DE STAFF MODULAR LIMPIO */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {usuarios.map(u => (
-          <div 
-            key={u.id_usuario} 
-            className="bg-white p-5 rounded-2xl border border-slate-100 flex items-center justify-between shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all hover:border-slate-200"
-          >
-            <div className="flex items-center gap-5">
-              {/* Contenedor del Icono del Rol */}
-              <div className="w-11 h-11 rounded-xl bg-[#f4f1ea] flex items-center justify-center">
-                {obtenerIconoRol(u.rol)}
+      {/* 💳 RESTRUCTURACIÓN COMPLETA: GRID DE ID CARDS ESTILO FOTOCHECK */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {usuarios.map(u => {
+          const estado = u.estado_sesion || 'offline';
+          
+          return (
+            <div 
+              key={u.id_usuario} 
+              className="bg-white rounded-3xl border border-slate-100/80 p-5 flex flex-col justify-between shadow-[0_4px_16px_rgba(0,0,0,0.01)] relative overflow-hidden transition-all hover:border-slate-200"
+            >
+              {/* BLOQUE INFERIOR DE ACCIONES ABSOLUTAS (ESQUINA SUPERIOR DERECHA) */}
+              <div className="absolute top-4 right-4 flex gap-1.5 z-10">
+                <button 
+                  onClick={() => setUsuarioEditar(u)} 
+                  className="p-2 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-100 hover:text-[#2C3E50] transition-all border border-slate-100/50"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+                <button 
+                  onClick={() => eliminarUsuario(u.id_usuario)} 
+                  className="p-2 bg-rose-50/60 text-rose-400 rounded-xl hover:bg-rose-100 hover:text-rose-600 transition-all border border-rose-100/30"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
               </div>
-              <div>
-                <p className="text-[#2C3E50] font-black text-xs uppercase tracking-wider">{u.nombre}</p>
-                <p className="text-[9px] text-[#b07d62] font-bold tracking-widest uppercase mt-0.5">{u.rol}</p>
+
+              {/* ENCABEZADO DEL FOTOCHECK: AVATAR + IDENTIDAD */}
+              <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
+                <div className="w-12 h-12 rounded-full bg-[#f4f1ea] flex items-center justify-center relative shadow-inner">
+                  {obtenerIconoRol(u.rol)}
+                  {/* 🟢 PUNTO DE ORO: Indicador de Conectividad de Sesión en Tiempo Real */}
+                  <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white shadow-sm
+                    ${estado === 'activo' ? 'bg-emerald-500' : estado === 'break' ? 'bg-amber-500' : 'bg-slate-300'}`}
+                  />
+                </div>
+                <div>
+                  <p className="text-[#2C3E50] font-black text-xs uppercase tracking-wider pr-14 truncate max-w-[150px]">{u.nombre}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[8px] tracking-[0.2em] bg-[#b07d62]/10 text-[#b07d62] font-black px-2 py-0.5 rounded-md uppercase">
+                      {u.rol}
+                    </span>
+                    <span className="text-[8px] font-bold text-slate-400 uppercase">
+                      ID: {u.usuario}
+                    </span>
+                  </div>
+                </div>
               </div>
+
+              {/* CUERPO DEL FOTOCHECK: RENDIMIENTO DINÁMICO SEGÚN ROL */}
+              <div className="py-4 flex-1">
+                {u.rol?.toLowerCase() === 'mozo' && (
+                  <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100/50">
+                    <span className="text-[9px] font-black text-slate-400 tracking-wider uppercase">Carga de Trabajo:</span>
+                    <span className="text-[10px] font-black text-[#b07d62] tracking-wider uppercase">
+                      {u.mesas_asignadas || 0} Mesas Activas
+                    </span>
+                  </div>
+                )}
+
+                {u.rol?.toLowerCase() === 'recepcionista' && (
+                  <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100/50">
+                    <span className="text-[9px] font-black text-slate-400 tracking-wider uppercase">Ingresos Validados:</span>
+                    <span className="text-[10px] font-black text-[#b07d62] tracking-wider uppercase">
+                      {u.checkins_hoy || 0} Check-Ins Hoy
+                    </span>
+                  </div>
+                )}
+
+                {u.rol?.toLowerCase() === 'admin' && (
+                  <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100/50">
+                    <span className="text-[9px] font-black text-slate-400 tracking-wider uppercase">Privilegios:</span>
+                    <span className="text-[10px] font-black text-emerald-600 tracking-wider uppercase">
+                      Control Maestro
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* PIE DEL FOTOCHECK: TRAZABILIDAD Y AUDITORÍA EN VIVO */}
+              <div className="border-t border-slate-50 pt-3 mt-1">
+                <p className="text-[8px] font-black text-slate-400 tracking-widest uppercase">Última Acción Registrada</p>
+                <p className="text-[10px] font-bold text-slate-600 truncate mt-1 bg-slate-50/50 py-1.5 px-2.5 rounded-lg border border-dashed border-slate-200/60">
+                  {u.ultima_accion || 'Sin actividad reciente'}
+                </p>
+              </div>
+
             </div>
-            
-            {/* Acciones de Edición y Eliminación Minimalistas */}
-            <div className="flex gap-2.5">
-              <button 
-                onClick={() => setUsuarioEditar(u)} 
-                className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-100 hover:text-[#2C3E50] transition-all border border-slate-100/70"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </button>
-              <button 
-                onClick={() => eliminarUsuario(u.id_usuario)} 
-                className="p-3 bg-rose-50 text-rose-400 rounded-xl hover:bg-rose-100 hover:text-rose-600 transition-all border border-rose-100/50"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* 🌫️ MODAL 1: REGISTRAR PERSONAL NUEVO */}
