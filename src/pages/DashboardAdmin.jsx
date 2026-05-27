@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import wayraApi from '../api/wayraApi'; // Importamos tu instancia configurada de Axios
 import { ViewStats } from "../views/Admin/ViewStats"; 
 import { ViewCarta } from "../views/Admin/ViewCarta";
 import { ViewUsuarios } from "../views/Admin/ViewUsuarios";
@@ -6,6 +7,23 @@ import { ViewHistorial } from "../views/Admin/ViewHistorial";
 
 const DashboardAdmin = ({ onLogout, user }) => {
   const [seccion, setSeccion] = useState('stats');
+
+  // 🔓 MANEJADOR DE DESCONEXIÓN TRANSACCIONAL EN CALIENTE
+  const manejarCierreSesion = async () => {
+    try {
+      // Si el usuario existe y tiene un ID válido, le avisamos a Render para que lo pase a offline en Railway
+      if (user && user.id_usuario) {
+        await wayraApi.post('/logout', { id_usuario: user.id_usuario });
+      }
+    } catch (error) {
+      console.error("❌ Error al notificar el cierre de sesión al backend:", error);
+    } finally {
+      // Limpieza de seguridad local y ejecución del logout heredado del AuthContext/App
+      localStorage.clear();
+      sessionStorage.clear();
+      onLogout();
+    }
+  };
 
   return (
     <div className="flex h-screen bg-[#f4f1ea] font-['Montserrat'] overflow-hidden">
@@ -16,10 +34,9 @@ const DashboardAdmin = ({ onLogout, user }) => {
         {/* 🍣 BRANDING ESTÉTICO: Isotipo Oficial de Wayra Nikkei (Login Style) */}
         <div className="mb-14 pt-4 flex flex-col items-center md:items-start md:pl-4">
           <div className="flex items-center gap-3.5">
-            {/* Isotipo Oficial en Terracota (Ancho y Alto Escalados) */}
+            {/* Isotipo Oficial en Terracota */}
             <div className="text-[#b07d62]">
               <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                {/* Abstracción Minimalista del Sushi/Ola */}
                 <circle cx="12" cy="12" r="5" strokeWidth="2.5" fill="#f4f1ea" stroke="#b07d62" />
                 <path d="M7 12c2.5-3.5 5-3.5 10 0" strokeDasharray="3 2" />
                 <path d="M7 17c2.5-3.5 5-3.5 10 0" strokeWidth="0.8" />
@@ -94,24 +111,22 @@ const DashboardAdmin = ({ onLogout, user }) => {
           ))}
         </nav>
 
-        {/* CERRAR SESIÓN */}
+        {/* 🚪 BOTÓN DE CIERRE DE SESIÓN VINCULADO CON EL ENTE OPERATIVO */}
         <button 
-          onClick={onLogout} 
-          className="mt-auto pt-4 border-t border-white/5 flex items-center gap-4 text-slate-500 hover:text-[#d9534f] text-[9px] tracking-[0.2em] uppercase transition-all font-medium px-4 text-left"
+          onClick={manejarCierreSesion} 
+          className="mt-auto pt-4 border-t border-white/5 flex items-center gap-4 text-slate-500 hover:text-[#d9534f] text-[9px] tracking-[0.2em] uppercase transition-all font-medium px-4 text-left group"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 transition-colors group-hover:text-[#d9534f]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          <span className="hidden md:block">Salir</span>
+          <span className="hidden md:block transition-colors group-hover:text-[#d9534f]">Salir</span>
         </button>
       </aside>
 
-      {/* 🍽️ ÁREA DE CONTENIDO PRINCIPAL: Limpieza Absoluta de Cabecera */}
+      {/* 🍽️ ÁREA DE CONTENIDO PRINCIPAL */}
       <main className="flex-1 overflow-y-auto p-8 md:p-14 relative bg-[#f4f1ea]">
         
-        {/* El header anterior (h2 Métricas) fue removido para evitar la duplicación de títulos */}
-        
-        {/* VISTAS DINÁMICAS (Se renderizan al tope con espaciado limpio) */}
+        {/* VISTAS DINÁMICAS */}
         <div className="animate-in fade-in zoom-in-98 duration-300 pt-2">
           {seccion === 'stats' && <ViewStats />}
           {seccion === 'carta' && <ViewCarta />}
