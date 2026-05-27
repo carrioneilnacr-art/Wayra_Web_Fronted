@@ -7,7 +7,7 @@ export const ViewUsuarios = () => {
   const [usuarioEditar, setUsuarioEditar] = useState(null); 
   const [nuevoUsuario, setNuevoUsuario] = useState({ nombre: '', usuario: '', password: '', rol: 'mozo' });
 
-  // 1. CARGAR USUARIOS DESDE API (Trae subconsultas calculadas por Express)
+  // 1. CARGAR USUARIOS DESDE LA API
   const cargarUsuarios = async () => {
     try {
       const res = await wayraApi.get('/admin/usuarios');
@@ -19,12 +19,12 @@ export const ViewUsuarios = () => {
 
   useEffect(() => { 
     cargarUsuarios(); 
-    // Refresco sutil cada 15 segundos para mantener las ID Cards sincronizadas con las acciones vivas
+    // Refresco automático cada 15 segundos para mantener las ID Cards sincronizadas
     const interval = setInterval(cargarUsuarios, 15000);
     return () => clearInterval(interval);
   }, []);
 
-  // 2. GUARDAR NUEVO
+  // 2. GUARDAR NUEVO USUARIO
   const registrarPersonal = async (e) => {
     e.preventDefault();
     try {
@@ -39,7 +39,7 @@ export const ViewUsuarios = () => {
     }
   };
 
-  // 3. ACTUALIZAR
+  // 3. ACTUALIZAR PERSONAL
   const actualizarPersonal = async (e) => {
     e.preventDefault();
     try {
@@ -51,7 +51,7 @@ export const ViewUsuarios = () => {
     }
   };
 
-  // 4. ELIMINAR
+  // 4. ELIMINAR USUARIO
   const eliminarUsuario = async (id) => {
     if(!window.confirm("¿ELIMINAR ACCESO DEFINITIVAMENTE?")) return;
     try {
@@ -62,9 +62,10 @@ export const ViewUsuarios = () => {
     }
   };
 
-  // Diccionario de Iconos SVG por Rol del Staff
-  const obtenerIconoRol = (rol) => {
-    switch (rol.toLowerCase()) {
+  // 🎨 Diccionario de Iconos SVG por Rol del Staff (Blindado contra nulos)
+  const renderizarIconoRol = (rol) => {
+    const rolNormalizado = rol ? rol.toLowerCase() : 'mozo';
+    switch (rolNormalizado) {
       case 'admin':
         return (
           <svg className="w-5 h-5 text-[#b07d62]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
@@ -99,17 +100,17 @@ export const ViewUsuarios = () => {
         </button>
       </header>
 
-      {/* 💳 RESTRUCTURACIÓN COMPLETA: GRID DE ID CARDS ESTILO FOTOCHECK */}
+      {/* 💳 GRID DE ID CARDS ESTILO FOTOCHECK */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {usuarios.map(u => {
+        {usuarios && usuarios.map(u => {
           const estado = u.estado_sesion || 'offline';
           
           return (
             <div 
               key={u.id_usuario} 
-              className="bg-white rounded-3xl border border-slate-100/80 p-5 flex flex-col justify-between shadow-[0_4px_16px_rgba(0,0,0,0.01)] relative overflow-hidden transition-all hover:border-slate-200"
+              className="bg-white rounded-3xl border border-slate-100 p-5 flex flex-col justify-between shadow-[0_4px_16px_rgba(0,0,0,0.01)] relative overflow-hidden transition-all hover:border-slate-200"
             >
-              {/* BLOQUE INFERIOR DE ACCIONES ABSOLUTAS (ESQUINA SUPERIOR DERECHA) */}
+              {/* BOTONES DE EDICIÓN Y ACCIONES (ESQUINA SUPERIOR DERECHA) */}
               <div className="absolute top-4 right-4 flex gap-1.5 z-10">
                 <button 
                   onClick={() => setUsuarioEditar(u)} 
@@ -129,29 +130,29 @@ export const ViewUsuarios = () => {
                 </button>
               </div>
 
-              {/* ENCABEZADO DEL FOTOCHECK: AVATAR + IDENTIDAD */}
+              {/* ENCABEZADO: FOTO/AVATAR + IDENTIFICACIÓN */}
               <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
                 <div className="w-12 h-12 rounded-full bg-[#f4f1ea] flex items-center justify-center relative shadow-inner">
-                  {obtenerIconoRol(u.rol)}
-                  {/* 🟢 PUNTO DE ORO: Indicador de Conectividad de Sesión en Tiempo Real */}
-                  <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white shadow-sm
+                  {renderizarIconoRol(u.rol)}
+                  {/* INDICADOR EN VIVO DE CONECTIVIDAD */}
+                  <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm
                     ${estado === 'activo' ? 'bg-emerald-500' : estado === 'break' ? 'bg-amber-500' : 'bg-slate-300'}`}
                   />
                 </div>
-                <div>
-                  <p className="text-[#2C3E50] font-black text-xs uppercase tracking-wider pr-14 truncate max-w-[150px]">{u.nombre}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[#2C3E50] font-black text-xs uppercase tracking-wider truncate pr-12">{u.nombre || 'SIN NOMBRE'}</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-[8px] tracking-[0.2em] bg-[#b07d62]/10 text-[#b07d62] font-black px-2 py-0.5 rounded-md uppercase">
-                      {u.rol}
+                      {u.rol || 'STAFF'}
                     </span>
-                    <span className="text-[8px] font-bold text-slate-400 uppercase">
+                    <span className="text-[8px] font-bold text-slate-400 uppercase truncate">
                       ID: {u.usuario}
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* CUERPO DEL FOTOCHECK: RENDIMIENTO DINÁMICO SEGÚN ROL */}
+              {/* CUERPO: MÉTRICAS OPERATIVAS SEGÚN ROL COBRADAS EN VIVO */}
               <div className="py-4 flex-1">
                 {u.rol?.toLowerCase() === 'mozo' && (
                   <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100/50">
@@ -181,7 +182,7 @@ export const ViewUsuarios = () => {
                 )}
               </div>
 
-              {/* PIE DEL FOTOCHECK: TRAZABILIDAD Y AUDITORÍA EN VIVO */}
+              {/* PIE: AUDITORÍA EN TIEMPO REAL */}
               <div className="border-t border-slate-50 pt-3 mt-1">
                 <p className="text-[8px] font-black text-slate-400 tracking-widest uppercase">Última Acción Registrada</p>
                 <p className="text-[10px] font-bold text-slate-600 truncate mt-1 bg-slate-50/50 py-1.5 px-2.5 rounded-lg border border-dashed border-slate-200/60">
