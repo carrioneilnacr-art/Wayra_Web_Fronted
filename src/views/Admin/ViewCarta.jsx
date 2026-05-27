@@ -6,13 +6,65 @@ export const ViewCarta = () => {
   const [busqueda, setBusqueda] = useState("");
   const [catSel, setCatSel] = useState("TODOS");
   const [mostrarForm, setMostrarForm] = useState(false);
+  
+  // Estados para el control del nuevo sub-modal de edición de precio
+  const [modalPrecio, setModalPrecio] = useState({ abierto: false, idProducto: null, nombre: "", precioActual: "" });
+  const [nuevoPrecioInput, setNuevoPrecioInput] = useState("");
+
   const [nuevoProd, setNuevoProd] = useState({ 
     nombre: '', 
     precio: '', 
     categoria: 'Entradas', 
-    tiempo_estimado: 15 
+    tiempo_estimado: '' 
   });
+
   const categorias = ["TODOS", "ENTRADAS", "MAKIS", "FONDOS", "BEBIDAS", "POSTRES"];
+
+  // Diccionario de Iconos SVG Minimalistas por Categoría
+  const obtenerIconoCategoria = (cat, esDisponible) => {
+    const colorClass = esDisponible ? 'text-[#b07d62]' : 'text-slate-400';
+    switch (cat.toUpperCase()) {
+      case 'ENTRADAS':
+        return (
+          <svg className={`w-5 h-5 ${colorClass}`} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v18M3 12h18M6 6l12 12M6 18L12 12" />
+          </svg>
+        );
+      case 'MAKIS':
+        return (
+          <svg className={`w-5 h-5 ${colorClass}`} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9" />
+            <circle cx="12" cy="12" r="4" strokeDasharray="2 2" />
+          </svg>
+        );
+      case 'FONDOS':
+        return (
+          <svg className={`w-5 h-5 ${colorClass}`} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12M6 12h12" />
+          </svg>
+        );
+      case 'BEBIDAS':
+        return (
+          <svg className={`w-5 h-5 ${colorClass}`} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 7.5h12M6 16.5h12" />
+          </svg>
+        );
+      case 'POSTRES':
+        return (
+          <svg className={`w-5 h-5 ${colorClass}`} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        );
+      default:
+        return (
+          <svg className={`w-5 h-5 ${colorClass}`} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+          </svg>
+        );
+    }
+  };
 
   const cargarCarta = async () => {
     try {
@@ -22,6 +74,7 @@ export const ViewCarta = () => {
       console.error("Error cargando carta:", e); 
     }
   };
+
   useEffect(() => { 
     cargarCarta(); 
   }, []);
@@ -35,13 +88,26 @@ export const ViewCarta = () => {
     }
   };
 
+  const handleSavePrecioModal = async (e) => {
+    e.preventDefault();
+    if (!nuevoPrecioInput || isNaN(nuevoPrecioInput)) return;
+    try {
+      await wayraApi.put(`/admin/productos/${modalPrecio.idProducto}`, { precio: nuevoPrecioInput });
+      setModalPrecio({ abierto: false, idProducto: null, nombre: "", precioActual: "" });
+      setNuevoPrecioInput("");
+      cargarCarta();
+    } catch (e) {
+      alert("Error al cambiar el precio.");
+    }
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     try {
       const res = await wayraApi.post('/admin/productos', { ...nuevoProd, estado: 1 }); 
       if (res.status === 200 || res.status === 201) {
         setMostrarForm(false);
-        setNuevoProd({ nombre: '', precio: '', categoria: 'Entradas', tiempo_estimado: 15 });
+        setNuevoProd({ nombre: '', precio: '', categoria: 'Entradas', tiempo_estimado: '' });
         cargarCarta();
       }
     } catch (e) { 
@@ -52,14 +118,14 @@ export const ViewCarta = () => {
   return (
     <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-6 text-[#2C3E50]">
       
-      {/* SECCIÓN SUPERIOR DE ACCIONES (SIN TÍTULO DUPLICADO) */}
-      <header className="flex justify-between items-center gap-4">
-        <div className="flex gap-2 overflow-x-auto pb-1 max-w-xl scrollbar-none">
+      {/* 🚀 BARRA SUPERIOR FLEXIBLE EXTENDIDA COMPLETA (SIN SCROLLBAR) */}
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           {categorias.map(cat => (
             <button 
               key={cat} 
               onClick={() => setCatSel(cat)} 
-              className={`px-4 py-2 rounded-full text-[10px] tracking-[0.2em] font-bold uppercase transition-all border whitespace-nowrap 
+              className={`px-4 py-2 rounded-full text-[10px] tracking-[0.2em] font-bold uppercase transition-all border
                 ${catSel === cat 
                   ? 'bg-[#b07d62]/15 text-[#b07d62] border-[#b07d62]/30' 
                   : 'bg-white border-slate-100 text-[#7F8C8D] hover:border-slate-300'}`}
@@ -71,7 +137,7 @@ export const ViewCarta = () => {
         
         <button 
           onClick={() => setMostrarForm(true)}
-          className="bg-[#0a0913] text-white py-3 px-5 rounded-full font-bold text-[10px] tracking-[0.2em] uppercase shadow-sm hover:bg-[#2d2a45] transition-all flex items-center gap-2 whitespace-nowrap"
+          className="bg-[#0a0913] text-white py-3 px-5 rounded-full font-bold text-[10px] tracking-[0.2em] uppercase shadow-sm hover:bg-[#2d2a45] transition-all flex items-center gap-2 self-end sm:self-auto"
         >
           <span>+ Agregar Producto</span>
         </button>
@@ -87,7 +153,7 @@ export const ViewCarta = () => {
         />
       </div>
 
-      {/* 🍱 LISTADO DE PRODUCTOS (ESTILO MOCKUP BLANCO LIMPIO) */}
+      {/* 🍱 LISTADO DE PRODUCTOS EN BLOQUES LIMPIOS */}
       <div className="grid grid-cols-1 gap-3.5">
         {productos
           .filter(p => {
@@ -105,10 +171,10 @@ export const ViewCarta = () => {
                   ${esDisponible ? 'border-slate-100' : 'border-rose-200/60 bg-rose-50/20 opacity-75'}`}
               >
                 <div className="flex items-center gap-5">
-                  {/* Indicador de categoría minimalista plano */}
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xs font-black
-                    ${esDisponible ? 'bg-[#f4f1ea] text-[#b07d62]' : 'bg-slate-100 text-slate-400'}`}>
-                    {p.categoria.substring(0, 2).toUpperCase()}
+                  {/* Icono de Categoría Dinámico y Vectorial */}
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center
+                    ${esDisponible ? 'bg-[#f4f1ea]' : 'bg-slate-100'}`}>
+                    {obtenerIconoCategoria(p.categoria, esDisponible)}
                   </div>
                   <div>
                     <p className="text-[#2C3E50] font-black text-xs uppercase tracking-wider">{p.nombre}</p>
@@ -130,12 +196,9 @@ export const ViewCarta = () => {
                     {esDisponible ? 'DISPONIBLE' : 'AGOTADO'}
                   </button>
                   
-                  {/* Botón de configuración de precio */}
+                  {/* Botón de Configuración que dispara el Modal Interno de React */}
                   <button 
-                    onClick={() => {
-                      const n = prompt("INGRESA EL NUEVO PRECIO PARA " + p.nombre, p.precio);
-                      if(n && !isNaN(n)) handleUpdate(p.id_producto, 'precio', n);
-                    }}
+                    onClick={() => setModalPrecio({ abierto: true, idProducto: p.id_producto, nombre: p.nombre, precioActual: p.precio })}
                     className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-100 hover:text-[#2C3E50] transition-all border border-slate-100/70"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
@@ -149,7 +212,7 @@ export const ViewCarta = () => {
           })}
       </div>
 
-      {/* 🌫️ MODAL FORM CON FILTRO DE CRISTAL MINIMALISTA */}
+      {/* 🌫️ MODAL INSERCIÓN PRODUCTO (LIMPIADO DE SUGERENCIAS DE RELLENO) */}
       {mostrarForm && (
         <div className="fixed inset-0 bg-[#0a0913]/40 flex items-center justify-center z-50 p-4 backdrop-blur-md transition-all">
           <form onSubmit={handleSave} className="bg-white p-7 rounded-2xl border border-slate-100 w-full max-w-sm shadow-xl animate-in zoom-in-95 duration-200">
@@ -158,13 +221,13 @@ export const ViewCarta = () => {
             <div className="space-y-3.5">
               <div>
                 <label className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Nombre del Plato</label>
-                <input type="text" placeholder="EJ. CEVICHE NIKKEI" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold uppercase text-[11px]" 
+                <input type="text" placeholder="INGRESE NOMBRE" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold uppercase text-[11px]" 
                   onChange={e => setNuevoProd({...nuevoProd, nombre: e.target.value.toUpperCase()})} required />
               </div>
               
               <div>
                 <label className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Precio de Venta</label>
-                <input type="number" step="0.01" placeholder="S/ 0.00" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" 
+                <input type="number" step="0.01" placeholder="PRECIO" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" 
                   onChange={e => setNuevoProd({...nuevoProd, precio: e.target.value})} required />
               </div>
               
@@ -182,18 +245,59 @@ export const ViewCarta = () => {
 
               <div>
                 <label className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Tiempo Estimado (Minutos)</label>
-                <input type="number" placeholder="15 MIN" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" 
+                <input type="number" placeholder="TIEMPO" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" 
                   onChange={e => setNuevoProd({...nuevoProd, tiempo_estimado: e.target.value})} required />
               </div>
             </div>
 
             <div className="flex gap-3 mt-6">
               <button type="button" onClick={() => setMostrarForm(false)} className="flex-1 p-3 text-[#7F8C8D] font-bold hover:text-[#2C3E50] transition-colors text-[10px] tracking-widest">CANCELAR</button>
-              <button type="submit" className="flex-1 bg-[#0a0913] py-3 rounded-xl text-white font-black text-[10px] tracking-widest uppercase hover:bg-[#2d2a45] transition-all shadow-md shadow-slate-200">GUARDAR</button>
+              <button type="submit" className="flex-1 bg-[#0a0913] py-3 rounded-xl text-white font-black text-[10px] tracking-widest uppercase hover:bg-[#2d2a45] transition-all shadow-md">GUARDAR</button>
             </div>
           </form>
         </div>
       )}
+
+      {/* ⚙️ EXCLUSIVO MODAL INTEGRADO PARA EDICIÓN DE PRECIO (REEMPLAZO DE PROMPT DE NAVEGADOR) */}
+      {modalPrecio.abierto && (
+        <div className="fixed inset-0 bg-[#0a0913]/40 flex items-center justify-center z-50 p-4 backdrop-blur-md transition-all">
+          <form onSubmit={handleSavePrecioModal} className="bg-white p-6 rounded-2xl border border-slate-100 w-full max-w-xs shadow-xl animate-in zoom-in-95 duration-200">
+            <h3 className="text-[#0a0913] font-black text-sm mb-1 tracking-tight uppercase">Modificar Precio</h3>
+            <p className="text-[9px] font-bold text-[#7F8C8D] uppercase tracking-wider mb-4">{modalPrecio.nombre}</p>
+            
+            <div>
+              <label className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Nuevo Valor (S/)</label>
+              <input 
+                type="number" 
+                step="0.01" 
+                placeholder={`Actual: S/ ${parseFloat(modalPrecio.precioActual).toFixed(2)}`}
+                className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" 
+                value={nuevoPrecioInput}
+                onChange={e => setNuevoPrecioInput(e.target.value)}
+                required 
+                autoFocus
+              />
+            </div>
+
+            <div className="flex gap-2 mt-5">
+              <button 
+                type="button" 
+                onClick={() => setModalPrecio({ abierto: false, idProducto: null, nombre: "", precioActual: "" })} 
+                className="flex-1 p-2.5 text-[#7F8C8D] font-bold hover:text-[#2C3E50] transition-colors text-[10px] tracking-widest"
+              >
+                CANCELAR
+              </button>
+              <button 
+                type="submit" 
+                className="flex-1 bg-[#b07d62] py-2.5 rounded-xl text-white font-black text-[10px] tracking-widest uppercase hover:bg-[#96654c] transition-all shadow-sm"
+              >
+                ACTUALIZAR
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
     </div>
   );
 };
