@@ -8,91 +8,80 @@ const DashboardAdmin = ({ onLogout, user }) => {
   const [seccion, setSeccion] = useState('stats');
 
   return (
-    <div className="flex h-screen bg-[#F8F9FA] font-['Montserrat'] overflow-hidden">
+    <div className="flex h-screen bg-[#f4f1ea] font-['Montserrat'] overflow-hidden">
       
-      {/* 💻 SIDEBAR: Estilo Azul Índigo Profundo Sincronizado */}
-      <aside className="w-20 md:w-64 bg-[#111E38] p-8 flex flex-col shadow-[10px_0_30px_rgba(0,0,0,0.03)] z-20">
+      {/* 🥖 SIDEBAR: Minimalist Washi Style */}
+      <aside className="w-20 md:w-64 bg-[#e2dbd5] p-8 flex flex-col z-20">
         
-        {/* LOGO BRANDING */}
-        <div className="mb-12 text-center md:text-left">
-          <div className="hanko-status inline-block text-[#D35400] border border-[#D35400]/30 bg-white/5 px-4 py-2 mb-2 font-black tracking-widest text-xs rounded-lg">
-            WAYRA<br/>NIKKEI
+        {/* BRANDING MINIMAL */}
+        <div className="mb-16 text-center md:text-left pl-2">
+          <div className="text-[#2d3436] font-light tracking-[0.25em] text-sm font-sans uppercase">
+            WAYRA
+            <span className="block font-medium tracking-[0.38em] text-[10px] text-slate-500 mt-0.5">NIKKEI</span>
           </div>
-          <p className="hidden md:block text-[8px] tracking-[0.4em] text-slate-400 font-bold uppercase opacity-80 mt-1">
-            Nivel: {user?.rol || 'Admin'}
+          <p className="hidden md:block text-[8px] tracking-[0.3em] text-slate-400 font-medium uppercase mt-3">
+            {user?.rol || 'ADMIN'}
           </p>
         </div>
         
-        {/* NAVEGACIÓN PRINCIPAL */}
-        <nav className="flex-1 space-y-5">
+        {/* NAVEGACIÓN LIMPIA */}
+        <nav className="flex-1 space-y-3">
           {[
-            { id: 'stats', label: 'Dashboard', icon: '📊' },
-            { id: 'carta', label: 'Gestión Carta', icon: '🍣' },
-            { id: 'usuarios', label: 'Personal', icon: '👥' },
-            { id: 'historial', label: 'Historial', icon: '📜' }
+            { id: 'stats', label: 'Dashboard' },
+            { id: 'carta', label: 'Gestión Carta' },
+            { id: 'usuarios', label: 'Usuarios' },
+            { id: 'historial', label: 'Historial' }
           ].map(item => (
             <button 
               key={item.id}
               onClick={() => setSeccion(item.id)} 
-              className={`w-full text-left flex items-center gap-4 py-2.5 px-3 rounded-xl transition-all duration-300 group
-                ${seccion === item.id ? 'bg-white/5 text-[#D35400] font-bold shadow-inner' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+              className={`w-full text-left py-2.5 px-4 rounded-full transition-all duration-300 text-[10px] tracking-[0.25em] uppercase
+                ${seccion === item.id 
+                  ? 'bg-[#b07d62]/15 text-[#b07d62] font-bold' 
+                  : 'text-[#6c757d] hover:text-[#2d3436] hover:bg-black/5'}`}
             >
-              <span className={`text-lg transition-transform duration-300 ${seccion === item.id ? 'scale-110' : 'group-hover:scale-110'}`}>
-                {item.icon}
-              </span> 
-              <span className={`hidden md:block text-[10px] tracking-[0.3em] uppercase font-medium
-                ${seccion === item.id ? 'text-white' : ''}`}>
+              <span className="block truncate">
                 {item.label}
               </span>
-              {seccion === item.id && (
-                <div className="ml-auto w-1.5 h-1.5 bg-[#D35400] rounded-full shadow-[0_0_8px_#D35400]"></div>
-              )}
             </button>
           ))}
         </nav>
 
-        {/* LOGOUT BUTTON */}
+        {/* CERRAR SESIÓN */}
         <button 
           onClick={onLogout} 
-          className="mt-auto py-4 border-t border-white/10 text-slate-500 hover:text-[#C0392B] text-[9px] tracking-[0.4em] uppercase transition-all font-black"
+          className="mt-auto pt-4 border-t border-black/5 text-[#6c757d] hover:text-[#8a3324] text-[9px] tracking-[0.25em] uppercase transition-all font-medium pl-4 text-left"
         >
-          Cerrar Sesión
+          Salir
         </button>
       </aside>
 
-      {/* 🍽️ ÁREA DE TRABAJO PRINCIPAL: Fondo Off-White Limpio */}
-      <main className="flex-1 overflow-y-auto p-8 md:p-12 relative bg-[#F8F9FA]">
+      {/* 🍽️ ÁREA DE CONTENIDO */}
+      <main className="flex-1 overflow-y-auto p-8 md:p-14 relative bg-[#f4f1ea]">
         
-        {/* CABECERA DINÁMICA REESTRUCTURADA */}
-        <header className="mb-8 flex justify-between items-end border-b border-slate-200/60 pb-5">
+        {/* CABECERA LIMPIA SIN BLOQUE DERECHO */}
+        <header className="mb-10 pb-4 border-b border-black/[0.04]">
           <div className="animate-in slide-in-from-left duration-500">
-            <h2 className="text-2xl md:text-4xl font-black tracking-tight text-[#1F497D] uppercase">
-              {seccion === 'stats' ? 'Panel de Control' : 
-               seccion === 'carta' ? 'Inventario de Carta' : 
-               seccion === 'usuarios' ? 'Gestión de Personal' : 'Archivo Histórico'}
+            <h2 className="text-xl md:text-2xl font-light tracking-[0.4em] text-[#2d3436] uppercase">
+              {seccion === 'stats' ? 'Métricas' : 
+               seccion === 'carta' ? 'Gestión Carta' : 
+               seccion === 'usuarios' ? 'Usuarios' : 'Historial'}
             </h2>
-            <p className="text-[9px] tracking-[0.3em] text-[#7F8C8D] uppercase font-bold mt-1.5">
-              Administración General · Sistema de Resiliencia Operativa
+            <p className="text-[8px] tracking-[0.3em] text-[#b07d62] uppercase font-medium mt-1">
+              Gestión Profesional · {seccion}
             </p>
-          </div>
-
-          <div className="hidden lg:block text-right">
-            <p className="text-[8px] tracking-[0.3em] text-slate-400 uppercase font-medium">Patrimonio Nikkei</p>
-            <p className="text-[10px] tracking-[0.15em] text-[#1F497D] font-black uppercase">Lima — Tokyo</p>
           </div>
         </header>
 
-        {/* CONTENEDOR DE VISTAS CON ANIMACIÓN SUAVE */}
-        <div className="animate-in fade-in zoom-in-95 duration-400">
+        {/* VISTAS DINÁMICAS */}
+        <div className="animate-in fade-in zoom-in-98 duration-300">
           {seccion === 'stats' && <ViewStats />}
           {seccion === 'carta' && <ViewCarta />}
           {seccion === 'usuarios' && <ViewUsuarios />}
           {seccion === 'historial' && <ViewHistorial />}
         </div>
-
-        {/* WATERMARK DECORATIVO TRANSPARENTE */}
-        <div className="nazca-spirit opacity-[0.005] pointer-events-none absolute bottom-10 right-10 w-64 h-64"></div>
       </main>
+
     </div>
   );
 };
