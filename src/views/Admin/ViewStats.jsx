@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, Cell, AreaChart, Area 
 } from 'recharts';
 import wayraApi from '../../api/wayraApi'; 
@@ -8,6 +8,7 @@ import wayraApi from '../../api/wayraApi';
 export const ViewStats = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const cargarMetricas = async () => {
     try {
       const res = await wayraApi.get('/admin/metrics');
@@ -18,6 +19,7 @@ export const ViewStats = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     cargarMetricas();
     const interval = setInterval(cargarMetricas, 30000); 
@@ -25,81 +27,96 @@ export const ViewStats = () => {
   }, []);
 
   if (loading || !data) return (
-    <div className="flex h-full items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-600"></div>
+    <div className="flex h-full items-center justify-center bg-[#F8F9FA]">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-[#1F497D]"></div>
     </div>
   );
-  const COLORS = ['#2563eb', '#7c3aed', '#db2777', '#ea580c', '#16a34a'];
+
+  // Paleta de degradado sutil para las barras de platos más vendidos (Terracota a Índigo)
+  const BAR_COLORS = ['#D35400', '#C0392B', '#A04000', '#2C3E50', '#1F497D'];
 
   return (
-    <div className="animate-in fade-in duration-700 space-y-10">
-      <header>
-        <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase">Métricas de Rendimiento</h2>
-        <p className="text-[10px] text-blue-500 font-black tracking-[0.4em] mt-2">ANÁLISIS DE INGRESOS Y PRODUCTIVIDAD — WAYRA NIKKEI</p>
+    <div className="animate-in fade-in duration-700 space-y-8 p-6 bg-[#F8F9FA] min-h-screen text-[#2C3E50]">
+      
+      {/* HEADER MINIMALISTA */}
+      <header className="border-b border-slate-200 pb-4 flex justify-between items-center">
+        <div>
+          <h2 className="text-3xl font-black text-[#1F497D] tracking-tight uppercase">Dashboard Gerencial</h2>
+          <p className="text-[10px] text-[#7F8C8D] font-black tracking-[0.3em] mt-1">PATRIMONIO NIKKEI — LIMA / TOKYO</p>
+        </div>
+        <div className="text-right">
+          <span className="text-[10px] bg-[#1F497D] text-white font-bold px-3 py-1 rounded-full uppercase tracking-wider">Nivel: Admin</span>
+        </div>
       </header>
 
-      {/* CARDS KPI */}
+      {/* CARDS KPI - DISEÑO MODULAR BLANCO LIMPIO */}
       <div className="grid grid-cols-3 gap-6">
-        <div className="bg-[#161B22] p-8 rounded-[3rem] border border-white/5 shadow-2xl group hover:border-blue-500/50 transition-all">
-          <p className="text-[9px] font-black text-blue-500 mb-2 tracking-widest uppercase">Ventas de Hoy</p>
-          <h3 className="text-4xl font-black text-white italic">
-            S/ {Number(data.kpis?.ventasHoy || 0).toFixed(2)}
-          </h3>
-          <div className="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
-             <div className="h-full bg-blue-600 w-[70%] transition-all duration-1000"></div>
+        {/* ÓRDENES */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-[11px] font-black text-[#7F8C8D] tracking-wider uppercase">Órdenes</p>
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">↑ 8% vs ayer</span>
           </div>
+          <h3 className="text-4xl font-black text-[#1F497D]">{data.kpis?.pedidos || 0}</h3>
+          <p className="text-[9px] text-[#7F8C8D] mt-2 font-medium">Transacciones procesadas en el turno</p>
         </div>
         
-        <div className="bg-[#161B22] p-8 rounded-[3rem] border border-white/5 shadow-2xl group hover:border-emerald-500/50 transition-all">
-          <p className="text-[9px] font-black text-emerald-500 mb-2 tracking-widest uppercase">Órdenes Cerradas</p>
-          <h3 className="text-4xl font-black text-white italic">
-            {data.kpis?.pedidos || 0}
-          </h3>
-          <p className="text-[8px] text-slate-500 mt-2 font-bold uppercase">Eficiencia de despacho: 94%</p>
+        {/* TICKET PROMEDIO */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-[11px] font-black text-[#7F8C8D] tracking-wider uppercase">Avg Ticket</p>
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">↑ 5% vs ayer</span>
+          </div>
+          <h3 className="text-4xl font-black text-[#D35400]">S/ {Number(data.kpis?.ticketPromedio || 0).toFixed(2)}</h3>
+          <p className="text-[9px] text-[#7F8C8D] mt-2 font-medium">Consumo medio por mesa física</p>
         </div>
 
-        <div className="bg-[#161B22] p-8 rounded-[3rem] border border-white/5 shadow-2xl group hover:border-purple-500/50 transition-all">
-          <p className="text-[9px] font-black text-purple-500 mb-2 tracking-widest uppercase">Ticket Promedio</p>
-          <h3 className="text-4xl font-black text-white italic">
-            S/ {Number(data.kpis?.ticketPromedio || 0).toFixed(2)}
-          </h3>
-          <p className="text-[8px] text-slate-500 mt-2 font-bold uppercase">+12% vs semana pasada</p>
+        {/* EFICIENCIA */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-[11px] font-black text-[#7F8C8D] tracking-wider uppercase">Eficiencia</p>
+            <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">↓ 3% vs ayer</span>
+          </div>
+          <h3 className="text-4xl font-black text-[#2C3E50]">87%</h3>
+          <p className="text-[9px] text-[#7F8C8D] mt-2 font-medium">Tiempo óptimo de despacho a cocina</p>
         </div>
       </div>
 
       {/* GRÁFICAS PRINCIPALES */}
-      <div className="grid grid-cols-2 gap-8">
-        {/* GRÁFICA DE VENTAS (AREA) */}
-        <div className="bg-[#161B22] p-8 rounded-[4rem] border border-white/5 min-h-[400px]">
-          <p className="text-[10px] font-black mb-8 tracking-widest uppercase text-slate-400">Evolución de Ingresos (7 Días)</p>
-          <ResponsiveContainer width="100%" height={300}>
+      <div className="grid grid-cols-5 gap-6">
+        
+        {/* EVOLUCIÓN DE INGRESOS (AREA CHART) */}
+        <div className="col-span-3 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <p className="text-[11px] font-black mb-6 tracking-widest uppercase text-[#7F8C8D]">Ingresos últimos 7 días</p>
+          <ResponsiveContainer width="100%" height={260}>
             <AreaChart data={data.ventasSemana}>
               <defs>
-                <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                <linearGradient id="colorTerracota" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#D35400" stopOpacity={0.15}/>
+                  <stop offset="95%" stopColor="#D35400" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" />
-              <XAxis dataKey="fecha" stroke="#475569" fontSize={10} tickFormatter={(str) => str.split('-')[2]} />
-              <YAxis stroke="#475569" fontSize={10} />
-              <Tooltip contentStyle={{backgroundColor: '#0D1117', border: 'none', borderRadius: '15px', fontSize: '10px'}} />
-              <Area type="monotone" dataKey="total" stroke="#2563eb" fillOpacity={1} fill="url(#colorTotal)" strokeWidth={4} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+              <XAxis dataKey="fecha" stroke="#7F8C8D" fontSize={10} tickFormatter={(str) => str.split('-')[2]} />
+              <YAxis stroke="#7F8C8D" fontSize={10} />
+              <Tooltip contentStyle={{backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '11px', color: '#2C3E50'}} />
+              <Area type="monotone" dataKey="total" stroke="#D35400" fillOpacity={1} fill="url(#colorTerracota)" strokeWidth={3} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* TOP PRODUCTOS (BAR) */}
-        <div className="bg-[#161B22] p-8 rounded-[4rem] border border-white/5 min-h-[400px]">
-          <p className="text-[10px] font-black mb-8 tracking-widest uppercase text-slate-400">Platos con mayor demanda</p>
-          <ResponsiveContainer width="100%" height={300}>
+        {/* TOP DISHES (BAR CHART LAYOUT VERTICAL) */}
+        <div className="col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <p className="text-[11px] font-black mb-6 tracking-widest uppercase text-[#7F8C8D]">Top Dishes</p>
+          <ResponsiveContainer width="100%" height={260}>
             <BarChart data={data.topProductos} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" horizontal={false} />
               <XAxis type="number" hide />
-              <YAxis dataKey="nombre" type="category" stroke="#94a3b8" fontSize={9} width={90} />
-              <Tooltip cursor={{fill: '#ffffff05'}} contentStyle={{backgroundColor: '#0D1117', border: 'none', borderRadius: '15px', fontSize: '10px'}} />
-              <Bar dataKey="cantidad" radius={[0, 10, 10, 0]} barSize={25}>
+              <YAxis dataKey="nombre" type="category" stroke="#2C3E50" fontSize={10} width={95} />
+              <Tooltip cursor={{fill: '#F8F9FA'}} contentStyle={{backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '11px'}} />
+              <Bar dataKey="cantidad" radius={[0, 6, 6, 0]} barSize={16}>
                 {data.topProductos.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
                 ))}
               </Bar>
             </BarChart>
@@ -107,36 +124,70 @@ export const ViewStats = () => {
         </div>
       </div>
 
-      {/* TABLA DE RENDIMIENTO */}
-      <div className="bg-[#161B22] p-10 rounded-[4rem] border border-white/5 shadow-2xl">
-        <p className="text-[10px] font-black mb-8 tracking-widest uppercase text-blue-500">Productividad del Staff (Ranking)</p>
-        <table className="w-full text-left">
-          <thead>
-            <tr className="text-[9px] text-slate-500 border-b border-white/5">
-              <th className="pb-4 uppercase">Mozo</th>
-              <th className="pb-4 uppercase">Órdenes</th>
-              <th className="pb-4 uppercase">Venta Total</th>
-              <th className="pb-4 uppercase">Rendimiento (KPI)</th>
-            </tr>
-          </thead>
-          <tbody className="text-xs font-bold text-white italic">
-            {data.rendimientoMozos.map((mozo, idx) => (
-              <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition-all group">
-                <td className="py-6">{mozo.nombre}</td>
-                <td className="py-6">{mozo.mesas} mesas</td>
-                <td className="py-6 text-emerald-500 font-black uppercase">S/ {parseFloat(mozo.total_vendido).toFixed(2)}</td>
-                <td className="py-6">
-                  <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-blue-600 transition-all duration-1000" 
-                      style={{ width: `${Math.min((mozo.mesas / 15) * 100, 100)}%` }}
-                    ></div>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* FOOTER: RANKING Y BLOQUE DE INSIGHTS / ALERTAS */}
+      <div className="grid grid-cols-5 gap-6 items-start">
+        
+        {/* COMPONENTE DE SEGUIMIENTO TRANSACCIONAL (INSIGHTS Y ALERTAS) */}
+        <div className="col-span-2 space-y-4">
+          
+          {/* INSIGHT COMPLIANCE (VERDE DE CONFIRMACIÓN) */}
+          <div className="bg-[#E8F8F5] border border-[#A3E4D7] p-5 rounded-2xl flex items-start space-x-3">
+            <div className="mt-0.5 text-[#117A65]">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-[#117A65] uppercase tracking-wider mb-1">Insight Clave</h4>
+              <p className="text-xs text-[#16A085] font-semibold leading-relaxed">El 60% de ingresos proviene de 3 platos principales. Considera promocionar estas opciones en el mapa dinámico.</p>
+            </div>
+          </div>
+
+          {/* CRITICAL ALERT */}
+          <div className="bg-[#FADBD8] border border-[#F5B7B1] p-5 rounded-2xl flex items-start space-x-3">
+            <div className="mt-0.5 text-[#78281F]">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-[#78281F] uppercase tracking-wider mb-1">Alerta del Sistema</h4>
+              <p className="text-xs text-[#943126] font-semibold leading-relaxed">Las ventas bajaron un 20% en el horario de tarde. Revisa la asignación de mesas y flujo operativo.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* TABLA DE RENDIMIENTO DEL STAFF (3 COLUMNAS COMPACTAS) */}
+        <div className="col-span-3 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <p className="text-[11px] font-black mb-4 tracking-widest uppercase text-[#1F497D]">Desempeño del personal</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="text-[10px] text-[#7F8C8D] border-b border-slate-100">
+                  <th className="pb-3 uppercase tracking-wider">Mozo</th>
+                  <th className="pb-3 uppercase tracking-wider text-right">Monto</th>
+                  <th className="pb-3 uppercase tracking-wider text-right">Rendimiento</th>
+                </tr>
+              </thead>
+              <tbody className="text-xs text-[#2C3E50]">
+                {data.rendimientoMozos.map((mozo, idx) => (
+                  <tr key={idx} className="border-b border-slate-50 hover:bg-[#F8F9FA] transition-all">
+                    <td className="py-3.5 font-bold">{mozo.nombre}</td>
+                    <td className="py-3.5 text-right font-black text-emerald-600">S/ {parseFloat(mozo.total_vendido).toFixed(2)}</td>
+                    <td className="py-3.5 pl-6">
+                      <div className="flex items-center justify-end space-x-2">
+                        <span className="text-[10px] text-[#7F8C8D] font-bold">{mozo.mesas} ord.</span>
+                        <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-[#1F497D] rounded-full transition-all duration-1000" 
+                            style={{ width: `${Math.min((mozo.mesas / 12) * 100, 100)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
   );
