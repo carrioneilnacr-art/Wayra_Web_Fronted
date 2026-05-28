@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ejecutarCierreSesionGlobal } from '../../helpers/logoutHelper'; 
+// ✅ CORREGIDO: Ruta ajustada desde src/pages hacia src/helpers
+import { ejecutarCierreSesionGlobal } from '../helpers/logoutHelper'; 
 import { ViewStats } from "../views/Admin/ViewStats"; 
 import { ViewCarta } from "../views/Admin/ViewCarta";
 import { ViewUsuarios } from "../views/Admin/ViewUsuarios";
