@@ -43,7 +43,7 @@ const ReporteOcupacion = ({ reservas, totalMesas }) => {
             <span className="text-[9px] font-black my-0.5">{t.etiqueta}</span>
             <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
               <div 
-                className={`h-full transition-all duration-1000 ${porcentaje > 80 ? 'bg-rose-500' : 'bg-blue-600'}`}
+                className="h-full transition-all duration-1000 bg-blue-600"
                 style={{ width: `${porcentaje}%` }}
               ></div>
             </div>
@@ -58,7 +58,8 @@ const ReporteOcupacion = ({ reservas, totalMesas }) => {
 // =========================================================================
 // COMPONENTE PRINCIPAL: DASHBOARD RECEPCIÓN
 // =========================================================================
-const DashboardRecepcion = ({ onLogout }) => { 
+// 🌟 RECIBE EL OBJETO 'user' DE LAS PROPS PARA ASOCIAR LA IDENTIDAD A LAS RESERVAS
+const DashboardRecepcion = ({ onLogout, user }) => { 
   const [mesas, setMesas] = useState([]);
   const [reservas, setReservas] = useState([]);
   const [pestaña, setPestaña] = useState('hoy');
@@ -94,13 +95,22 @@ const DashboardRecepcion = ({ onLogout }) => {
 
   const handleGuardar = async (form) => {
     if (!form) { cargarDatos(); setMostrarForm(false); setMesaSel(null); setReservaAEditar(null); return; }
+    
+    // 🌟 INYECTAMOS EN CALIENTE EL ID DE LA RECEPCIONISTA EN EL CUERPO DEL FORMULARIO
+    const datosConIdentidad = {
+      ...form,
+      id_usuario: user?.id_usuario || null
+    };
+
     const url = reservaAEditar ? `https://wayra-web-backend.onrender.com/api/reservas/${reservaAEditar.id_reserva}` : 'https://wayra-web-backend.onrender.com/api/reservas';
     const method = reservaAEditar ? 'PUT' : 'POST';
+    
     await fetch(url, {
       method,
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(form)
+      body: JSON.stringify(datosConIdentidad) // 🌟 Viaja con la huella digital integrada
     });
+    
     setMostrarForm(false); setMesaSel(null); setReservaAEditar(null);
     cargarDatos();
   };
@@ -227,10 +237,12 @@ const DashboardRecepcion = ({ onLogout }) => {
         </div>
       </main>
 
+      {/* 🌟 EN PANEL DERECHO PASAMOS EL OBJETO DE INGRESO PARA EL CONTROL DEL REFRESH */}
       <PanelDerechoReservas 
         reservas={reservasFiltradas} mesasTotales={mesas} mesasVisibles={mesasVisibles} setMesasVisibles={setMesasVisibles}
         onSearch={setBusqueda} onEdit={(r) => { setReservaAEditar(r); setMesaSel(r); setMostrarForm(true); }}
         fechaSeleccionada={fechaSeleccionada} hoyStr={hoyStr} onCheckIn={cargarDatos} onTicketClick={setTicketDetalle}
+        user={user} // 🌟 Heredado para que el botón de check-in inyecte la auditoría a Sharlyn
       />
 
       {mesaSel && !mostrarForm && (
