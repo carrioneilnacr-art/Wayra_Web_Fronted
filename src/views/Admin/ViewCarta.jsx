@@ -72,9 +72,10 @@ export const ViewCarta = () => {
     }
   };
 
+  // ✅ CORREGIDO: Ahora consume tu nuevo endpoint de administrador que retorna la lista completa (estados 0 y 1)
   const cargarCarta = async () => {
     try {
-      const res = await wayraApi.get('/productos');
+      const res = await wayraApi.get('/admin/productos/todos');
       setProductos(res.data);
     } catch (e) { 
       console.error("Error cargando carta:", e); 
@@ -273,7 +274,7 @@ export const ViewCarta = () => {
         </div>
       )}
 
-      {/* ⚙️ MODAL 2: EDICIÓN INTEGRAL DE DATOS DEL PRODUCTO (REEMPLAZO TOTAL DE ANTERIOR PRECIO MODAL) */}
+      {/* ⚙️ MODAL 2: EDICIÓN INTEGRAL DE DATOS DEL PRODUCTO */}
       {modalEditar.abierto && (
         <div className="fixed inset-0 bg-[#0a0913]/40 flex items-center justify-center z-50 p-4 backdrop-blur-md transition-all">
           <form onSubmit={handleUpdateProductoCompleto} className="bg-white p-7 rounded-2xl border border-slate-100 w-full max-w-sm shadow-xl animate-in zoom-in-95 duration-200">
