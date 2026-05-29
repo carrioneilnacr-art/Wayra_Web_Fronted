@@ -13,69 +13,97 @@ export const ViewHistorial = () => {
       console.error("Error al cargar historial de Render:", e); 
     }
   };
+
   useEffect(() => { 
     cargarHistorial(); 
   }, [filtroFecha]);
 
   return (
-    <div className="animate-in fade-in duration-700">
-      <header className="flex justify-between items-end mb-10">
+    <div className="animate-in fade-in zoom-in-98 duration-500">
+      
+      {/* 📄 CABECERA ADAPTADA AL ENTORNO CLARO */}
+      <header className="flex justify-between items-end mb-10 px-2">
         <div>
-          <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase">Historial de Ventas</h2>
-          <p className="text-[10px] text-emerald-500 font-black mt-2 tracking-widest uppercase">Auditoría de pedidos finalizados</p>
+          <h2 className="text-3xl font-black text-slate-800 italic tracking-tighter uppercase">Historial de Ventas</h2>
+          <p className="text-[10px] text-[#b07d62] font-black mt-2 tracking-widest uppercase font-sans">Auditoría de pedidos finalizados</p>
         </div>
         
+        {/* FILTRADO DE FECHAS ESTILIZADO */}
         <div className="flex flex-col items-end">
-          <p className="text-[8px] text-slate-500 font-black mb-2 uppercase">Filtrar por fecha</p>
+          <p className="text-[8px] text-slate-400 font-black mb-2 uppercase tracking-widest font-sans">Filtrar por fecha</p>
           <input
             type="date"
             value={filtroFecha}
             onChange={(e) => setFiltroFecha(e.target.value)}
-            className="bg-[#161B22] border border-white/10 p-3 rounded-xl text-white text-xs font-black outline-none focus:border-blue-600 transition-all cursor-pointer"
+            className="bg-white border border-slate-200/60 p-3 rounded-2xl text-slate-800 text-xs font-black outline-none focus:border-[#b07d62] focus:ring-1 focus:ring-[#b07d62]/20 shadow-sm transition-all cursor-pointer font-sans"
           />
         </div>
       </header>
 
-      <div className="bg-[#161B22] rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl">
-        <table className="w-full text-left">
-          <thead className="bg-white/5 text-[9px] text-slate-500 uppercase font-black">
+      {/* 🏛️ TABLA ESTILO CLEAN DESIGN DE WAYRA */}
+      <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-[0_10px_35px_rgba(0,0,0,0.02)]">
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-slate-50/60 text-[9px] text-slate-400 uppercase font-black tracking-widest border-b border-slate-100 font-sans">
             <tr>
-              <th className="p-6">ID TICKET</th>
-              <th className="p-6">HORA</th>
-              <th className="p-6">MOZO</th>
-              <th className="p-6 text-center">MESA</th>
-              <th className="p-6">TOTAL</th>
-              <th className="p-6">ACCIONES</th>
-              <th className="p-6 text-right">ESTADO</th>
+              <th className="py-5 px-8">ID TICKET</th>
+              <th className="py-5 px-6">HORA</th>
+              <th className="py-5 px-6">MOZO</th>
+              <th className="py-5 px-6 text-center">MESA</th>
+              <th className="py-5 px-6">TOTAL</th>
+              <th className="py-5 px-6 text-center">ACCIONES</th>
+              <th className="py-5 px-8 text-right">ESTADO</th>
             </tr>
           </thead>
           
-          <tbody className="text-[11px] font-bold italic">
+          <tbody className="text-[11px] font-bold italic text-slate-700">
             {pedidos.length > 0 ? pedidos.map(p => (
-              <tr key={p.id_pedido} className="border-b border-white/5 hover:bg-white/5 transition-all group">
-                <td className="p-6 text-blue-500">#TK-{p.id_pedido.toString().padStart(4, '0')}</td>
-                <td className="p-6 text-slate-400">{p.hora}</td>
-                <td className="p-6 text-white uppercase">{p.nombre_mozo}</td>
-                <td className="p-6 text-center text-white">{p.id_mesa}</td>
-                <td className="p-6 text-emerald-500 font-black text-xs">S/ {parseFloat(p.total).toFixed(2)}</td>
+              <tr key={p.id_pedido} className="border-b border-slate-50 hover:bg-slate-50/40 transition-all group">
+                {/* ID TICKET EN AZUL MINIMAL */}
+                <td className="py-5 px-8 font-mono text-blue-600 font-black not-italic text-[12px]">
+                  #TK-{p.id_pedido.toString().padStart(4, '0')}
+                </td>
                 
-                <td className="p-6">
-                  <button                  
+                {/* HORA */}
+                <td className="py-5 px-6 text-slate-400 font-medium font-sans not-italic">{p.hora}</td>
+                
+                {/* MOZO */}
+                <td className="py-5 px-6 text-slate-800 uppercase tracking-tight">{p.nombre_mozo}</td>
+                
+                {/* MESA */}
+                <td className="py-5 px-6 text-center text-slate-800 not-italic font-black">
+                  <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-xl text-[10px]">
+                    {p.id_mesa}
+                  </span>
+                </td>
+                
+                {/* TOTAL COMPENSADO */}
+                <td className="py-5 px-6 text-slate-900 font-black text-xs not-italic font-sans">
+                  S/ {parseFloat(p.total).toFixed(2)}
+                </td>
+                
+                {/* ACCIONES: BOTÓN MINIMALISTA TRANSPARENTE LINEAL */}
+                <td className="py-5 px-6 text-center">
+                  <button          
                     onClick={() => window.open(`${wayraApi.defaults.baseURL}/admin/boleta/${p.id_pedido}`, '_blank')}
-                    className="bg-white/5 text-white p-3 rounded-xl hover:bg-white hover:text-black transition-all text-[9px] font-black uppercase tracking-tighter"
+                    className="inline-flex items-center gap-2 bg-slate-50 text-slate-600 py-2 px-4 rounded-xl border border-slate-200/40 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all text-[9px] font-black uppercase tracking-widest font-sans shadow-sm"
                   >
-                    📄 Ver Boleta
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Boleta
                   </button>
                 </td>
-                <td className="p-6 text-right">
-                  <span className="bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase">
+
+                {/* ESTADO CON SUTIL BADGE ESMERALDA */}
+                <td className="py-5 px-8 text-right">
+                  <span className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-xl text-[8px] font-black tracking-widest uppercase border border-emerald-200/30 font-sans not-italic">
                     PAGADO
                   </span>
                 </td>
               </tr>
             )) : (
               <tr>
-                <td colSpan="7" className="p-20 text-center text-slate-600 font-black tracking-[0.5em] uppercase">
+                <td colSpan="7" className="py-24 text-center text-slate-400 font-black tracking-[0.3em] uppercase text-[10px] font-sans bg-slate-50/20">
                   No hay registros para esta fecha
                 </td>
               </tr>
@@ -83,6 +111,7 @@ export const ViewHistorial = () => {
           </tbody>
         </table>
       </div>
+
     </div>
   );
 };
