@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import wayraApi from '../../api/wayraApi'; 
+import { pedidoService } from '../../services/pedidoService';
+import wayraApi from '../../api/wayraApi'; // Se mantiene solo para acceder a la baseURL de las boletas impresas
 
 export const ViewHistorial = () => {
   const [pedidos, setPedidos] = useState([]);
@@ -7,10 +8,11 @@ export const ViewHistorial = () => {
 
   const cargarHistorial = async () => {
     try {
-      const res = await wayraApi.get(`/admin/historial?fecha=${filtroFecha}`);
-      setPedidos(res.data);
+      // ✅ ARQUITECTURA SENIOR: Consumo del servicio centralizado pasándole la fecha filtrada
+      const data = await pedidoService.getHistorial(filtroFecha);
+      setPedidos(data);
     } catch (e) { 
-      console.error("Error al cargar historial de Render:", e); 
+      console.error("Error al cargar historial desde el servicio:", e); 
     }
   };
 
@@ -19,30 +21,30 @@ export const ViewHistorial = () => {
   }, [filtroFecha]);
 
   return (
-    <div className="animate-in fade-in zoom-in-98 duration-500">
+    <div className="animate-in fade-in zoom-in-98 duration-500 space-y-6">
       
-      {/* 📄 CABECERA ADAPTADA AL ENTORNO CLARO */}
-      <header className="flex justify-between items-end mb-10 px-2">
+      {/* 📄 CABECERA ADAPTATIVA */}
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 px-2">
         <div>
           <h2 className="text-3xl font-black text-slate-800 italic tracking-tighter uppercase">Historial de Ventas</h2>
           <p className="text-[10px] text-[#b07d62] font-black mt-2 tracking-widest uppercase font-sans">Auditoría de pedidos finalizados</p>
         </div>
         
         {/* FILTRADO DE FECHAS ESTILIZADO */}
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col items-start sm:items-end w-full sm:w-auto">
           <p className="text-[8px] text-slate-400 font-black mb-2 uppercase tracking-widest font-sans">Filtrar por fecha</p>
           <input
             type="date"
             value={filtroFecha}
             onChange={(e) => setFiltroFecha(e.target.value)}
-            className="bg-white border border-slate-200/60 p-3 rounded-2xl text-slate-800 text-xs font-black outline-none focus:border-[#b07d62] focus:ring-1 focus:ring-[#b07d62]/20 shadow-sm transition-all cursor-pointer font-sans"
+            className="bg-white border border-slate-200/60 p-3 rounded-2xl text-slate-800 text-xs font-black outline-none focus:border-[#b07d62] focus:ring-1 focus:ring-[#b07d62]/20 shadow-sm transition-all cursor-pointer font-sans w-full sm:w-auto"
           />
         </div>
       </header>
 
-      {/* 🏛️ TABLA ESTILO CLEAN DESIGN DE WAYRA */}
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-[0_10px_35px_rgba(0,0,0,0.02)]">
-        <table className="w-full text-left border-collapse">
+      {/* 🏛️ CONTENEDOR ELÁSTICO CON SCROLL DIAGONAL/TÁCTIL PROTEGIDO */}
+      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_10px_35px_rgba(0,0,0,0.02)] overflow-x-auto scrollbar-thin">
+        <table className="w-full text-left border-collapse min-w-[700px]">
           <thead className="bg-slate-50/60 text-[9px] text-slate-400 uppercase font-black tracking-widest border-b border-slate-100 font-sans">
             <tr>
               <th className="py-5 px-8">ID TICKET</th>
@@ -81,7 +83,7 @@ export const ViewHistorial = () => {
                   S/ {parseFloat(p.total).toFixed(2)}
                 </td>
                 
-                {/* ACCIONES: BOTÓN MINIMALISTA TRANSPARENTE LINEAL */}
+                {/* ACCIONES: BOTÓN MINIMALISTA */}
                 <td className="py-5 px-6 text-center">
                   <button          
                     onClick={() => window.open(`${wayraApi.defaults.baseURL}/admin/boleta/${p.id_pedido}`, '_blank')}
