@@ -13,7 +13,6 @@ export const pedidoService = {
     const res = await wayraApi.get(`/mozo/mesas?id_mozo=${idMozo}`);
     return res.data;
   },
-
   // 3. Despachar comanda o agregar platos
   crearPedido: async (datosComanda) => {
     if (datosComanda.modo === 'agregar') {
@@ -29,7 +28,6 @@ export const pedidoService = {
     const res = await wayraApi.get(`/mozo/pedidos/estatus?id_mozo=${idMozo}`);
     return res.data;
   },
-
   // 5. Procesar el cobro e integración IZIPAY
   pagarPedido: async (idPedido) => {
     const res = await wayraApi.put(`/pedidos/${idPedido}/pagar`);

@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import { pedidoService } from '../../services/pedidoService';
+import wayraApi from '../../api/wayraApi'; 
 import ComanderoCarta from './ComanderoCarta';
 
-export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTicket }) => {
+const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTicket }) => {
   const [pedidoSel, setPedidoSel] = useState(null);
-  const [fase, setFase] = useState('detalle'); 
-  const [metodoPago, setMetodoPago] = useState('YAPE');
-  const [clienteExtra, setClienteExtra] = useState({ documento: '', nombre: '' });
   const [ahora, setAhora] = useState(new Date());
-  const [showAdd, setShowAdd] = useState(false);
   const [nuevaObs, setNuevaObs] = useState("");
   const [proximasReservas, setProximasReservas] = useState([]);
 
@@ -19,11 +15,10 @@ export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTic
   const cargarMisReservas = async () => {
     try {
       if (!userLogueado?.id_usuario) return;
-      // ✅ ARQUITECTURA SENIOR: Consumo desde el servicio unificado de pedidos
-      const data = await pedidoService.getReservasMozoHoy(userLogueado.id_usuario);
-      setProximasReservas(data); 
+      const res = await wayraApi.get(`/reservas/hoy?id_mozo=${userLogueado.id_usuario}`);
+      setProximasReservas(res.data); 
     } catch (e) { 
-      console.error("Error cargando reservas del mozo:", e); 
+      console.error("Error cargando reservas:", e); 
     }
   };
 
@@ -40,15 +35,13 @@ export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTic
   const eliminarPlato = async (idDetalle) => {
     if (!window.confirm("¿Eliminar este plato del pedido?")) return;
     try {
-      // ✅ ARQUITECTURA SENIOR: Eliminación abstracta mediante el servicio
-      await pedidoService.eliminarItemDetalle(idDetalle);
+      await wayraApi.delete(`/pedidos/detalle/${idDetalle}`);
       onUpdate(); 
       setPedidoSel(null);
     } catch (e) { 
       console.error("No se pudo eliminar el plato:", e); 
     }
   };
-
   const generarTicketPDF = (pedido, tipoDoc) => {
     const doc = new jsPDF({ format: [80, 180] });
     const ancho = 80;
@@ -83,8 +76,7 @@ export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTic
     if (tipoDoc === 'FACTURA' && docLen !== 11) return alert("❌ RUC INVÁLIDO (11 DÍGITOS)");
 
     try {
-      // ✅ ARQUITECTURA SENIOR: Checkout centralizado
-      await pedidoService.procesarCheckout(pedidoSel.id_pedido, {
+      await wayraApi.put(`/pedidos/${pedidoSel.id_pedido}/checkout`, {
         metodo_pago: metodoPago, 
         tipo_doc: tipoDoc, 
         dni_cliente: clienteExtra.documento, 
@@ -102,33 +94,30 @@ export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTic
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-700 text-[#2C3E50] uppercase italic">
-      
-      {/* SECCIÓN RESERVAS HOY CON CARDS ESTILIZADAS */}
+    <div className="space-y-8 animate-in fade-in duration-700">
+      {/* SECCIÓN RESERVAS HOY */}
       <section>
-        <p className="text-[10px] text-emerald-600 mb-3 tracking-[0.3em] font-black italic not-italic">📅 MIS PRÓXIMAS RESERVAS</p>
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
+        <p className="text-[10px] text-emerald-500 mb-4 tracking-[0.3em] font-black italic">📅 MIS PRÓXIMAS RESERVAS</p>
+        <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
           {proximasReservas.length > 0 ? proximasReservas.map(res => (
-            <div key={res.id_reserva} className="min-w-[240px] bg-emerald-50/50 border border-emerald-100 p-4 rounded-[2rem] shadow-[0_2px_8px_rgba(0,0,0,0.01)]">
+            <div key={res.id_reserva} className="min-w-[240px] bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-[2rem]">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-slate-800 text-xs font-black not-italic font-sans">{res.hora_reserva}</span>
-                <span className="text-[8px] bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-md font-black not-italic font-sans">ASIGNADA</span>
+                <span className="text-white text-xs font-black">{res.hora_reserva}</span>
+                <span className="text-[7px] bg-emerald-500 text-black px-2 py-0.5 rounded-full font-bold">ASIGNADA</span>
               </div>
-              <p className="text-slate-700 text-[11px] font-bold tracking-wide truncate">{res.nombre_cliente}</p>
-              <p className="text-slate-400 text-[9px] mt-1 font-bold not-italic font-sans">MESA {res.id_mesa} • {res.personas} PERSONAS</p>
+              <p className="text-white text-[11px] lowercase first-letter:uppercase">{res.nombre_cliente}</p>
+              <p className="text-slate-500 text-[8px] mt-1">MESA {res.id_mesa} • {res.personas} PERS.</p>
             </div>
-          )) : <p className="text-slate-400 text-[9px] py-2 lowercase italic tracking-widest font-bold">No tienes reservas asignadas hoy...</p>}
+          )) : <p className="text-slate-600 text-[9px] py-4 lowercase italic tracking-widest">No tienes reservas próximas...</p>}
         </div>
       </section>
 
-      {/* HEADER DE MESAS EN SERVICIO */}
-      <header className="flex justify-between items-center border-b border-slate-100 pb-3 mt-4">
-        <p className="text-[10px] font-black text-blue-600 tracking-[0.3em] not-italic">MESAS EN SERVICIO</p>
-        <span className="text-[10px] font-black text-slate-400 not-italic font-sans">{misPedidos.length} ACTIVAS</span>
+      <header className="flex justify-between items-center">
+        <p className="text-[10px] font-black text-blue-500 tracking-[0.3em]">MESAS EN SERVICIO</p>
+        <span className="text-[9px] text-slate-500">{misPedidos.length} / 4 ACTIVAS</span>
       </header>
 
-      {/* GRID RESPONSIVO DE MONITOR DE MESAS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="space-y-4">
         {misPedidos.map(p => {
           const minutos = Math.floor((ahora - new Date(p.fecha_pedido)) / 60000);
           const progreso = Math.min((minutos / 20) * 100, 100); 
@@ -136,99 +125,86 @@ export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTic
 
           return (
             <div key={p.id_pedido} onClick={() => setPedidoSel(p)} 
-              className={`bg-white border rounded-[2rem] p-5 cursor-pointer transition-all hover:border-blue-500/40 flex flex-col justify-between shadow-[0_2px_8px_rgba(0,0,0,0.01)] h-36
-                ${algunListo ? 'border-emerald-200 bg-emerald-50/10 shadow-[0_4px_16px_rgba(16,185,129,0.04)]' : 'border-slate-100'}`}>
-              
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-lg font-black text-slate-800 italic tracking-tighter">MESA #{p.id_mesa}</span>
-                {algunListo 
-                  ? <span className="text-[8px] bg-emerald-500 text-white px-2.5 py-1 rounded-xl font-black italic tracking-wider animate-pulse">🛎️ ¡LISTO!</span> 
-                  : <span className="text-[8px] font-black px-2.5 py-1 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 italic tracking-wide">{minutos} MIN</span>}
+              className={`bg-[#161B22] border border-white/5 rounded-[2.5rem] p-6 cursor-pointer hover:border-blue-500/50 transition-all ${algunListo ? 'shadow-[0_0_30px_rgba(16,185,129,0.1)] border-emerald-500/30' : ''}`}>
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-xl font-black text-white italic tracking-tighter">MESA {p.id_mesa}</span>
+                {algunListo ? <span className="text-[8px] bg-emerald-500 text-black px-3 py-1 rounded-full font-black animate-bounce italic">🛎️ ¡LISTO!</span> : <span className="text-[8px] font-black px-3 py-1 rounded-full bg-blue-600 text-white italic">{minutos} MIN</span>}
               </div>
-
-              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden my-3">
+              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mb-4">
                 <div className={`h-full transition-all duration-1000 ${progreso > 75 ? 'bg-rose-500' : 'bg-blue-600'}`} style={{ width: `${progreso}%` }}></div>
               </div>
-
-              <div className="flex justify-between items-center mt-2">
-                <p className="text-[9px] text-slate-400 font-bold not-italic font-sans uppercase tracking-widest">{p.items?.length || 0} PLATILLOS</p>
-                <p className="text-sm font-black text-slate-800 not-italic font-sans">S/ {parseFloat(p.total).toFixed(2)}</p>
+              <div className="flex justify-between items-center">
+                <p className="text-[9px] text-slate-500">{p.items?.length || 0} ITEMS</p>
+                <p className="text-sm font-black text-white italic">S/ {parseFloat(p.total).toFixed(2)}</p>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* DETALLE LATERAL O PASARELA EN MODAL ELEGANTE */}
       {pedidoSel && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[999] flex justify-end animate-in fade-in duration-300">
-          <div className="w-full max-w-md bg-white border-l border-slate-100 p-8 flex flex-col h-full shadow-2xl">
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[999] flex justify-end">
+          <div className="w-full max-w-xl bg-[#0A0C10] border-l border-white/10 p-10 flex flex-col">
             {fase === 'detalle' ? (
               <>
-                <div className="flex justify-between items-center mb-8 border-b border-slate-50 pb-4">
-                  <h3 className="text-2xl font-black text-slate-800 italic underline decoration-blue-600 decoration-4 tracking-tighter">MESA #{pedidoSel.id_mesa}</h3>
-                  <button onClick={() => setPedidoSel(null)} className="text-rose-500 text-[10px] font-black tracking-widest uppercase not-italic">CERRAR</button>
+                <div className="flex justify-between mb-10">
+                  <h3 className="text-4xl font-black text-white italic underline decoration-blue-600 tracking-tighter">MESA {pedidoSel.id_mesa}</h3>
+                  <button onClick={() => setPedidoSel(null)} className="text-rose-500 text-[10px] font-black tracking-widest uppercase">Cerrar</button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
+                <div className="flex-1 overflow-y-auto space-y-3 no-scrollbar">
                   {pedidoSel.items?.map(item => {
                     const transcurrido = Math.floor((ahora - new Date(pedidoSel.fecha_pedido)) / 60000);
                     const listo = transcurrido >= (item.tiempo_estimado || 15);
                     return (
-                      <div key={item.id_detalle} className="bg-slate-50/60 p-4 rounded-2xl flex justify-between items-center border border-slate-100/50">
+                      <div key={item.id_detalle} className="bg-white/5 p-5 rounded-3xl flex justify-between items-center border border-white/5">
                         <div>
-                          <p className="text-xs text-slate-800 font-black italic">{item.cantidad}x {item.nombre}</p>
-                          <p className={`text-[8px] font-black mt-1 not-italic font-sans tracking-wide ${listo ? 'text-emerald-600' : 'text-blue-500'}`}>{listo ? '🛎️ ¡LLEVAR AHORA!' : `PROGRESO: ${transcurrido}/${item.tiempo_estimado || 15} MIN`}</p>
+                          <p className="text-xs text-white font-black italic">{item.cantidad}x {item.nombre}</p>
+                          <p className={`text-[8px] font-black mt-1 ${listo ? 'text-emerald-500 animate-pulse' : 'text-blue-500'}`}>{listo ? '🛎️ ¡LLEVAR AHORA!' : `PROGRESO: ${transcurrido}/${item.tiempo_estimado || 15} MIN`}</p>
                         </div>
-                        <button onClick={() => eliminarPlato(item.id_detalle)} className="text-rose-400 p-2 hover:bg-rose-50 rounded-xl transition-all font-bold">✕</button>
+                        <button onClick={() => eliminarPlato(item.id_detalle)} className="text-rose-500 p-2 hover:bg-rose-500/10 rounded-xl transition-all">✕</button>
                       </div>
                     );
                   })}
                 </div>
 
-                <div className="mt-4 p-4 bg-slate-50/60 rounded-2xl border border-slate-100/70">
-                   <p className="text-[8px] text-slate-400 mb-1.5 font-black not-italic tracking-wider">NOTA PARA COCINA:</p>
-                   <textarea value={nuevaObs} readOnly className="w-full bg-transparent text-[11px] text-slate-600 outline-none h-12 resize-none italic font-medium" />
+                <div className="mt-6 p-6 bg-white/5 rounded-3xl border border-white/5">
+                   <p className="text-[8px] text-slate-500 mb-2 font-black">NOTA PARA COCINA:</p>
+                   <textarea value={nuevaObs} readOnly className="w-full bg-transparent text-[11px] text-white outline-none h-16 resize-none italic" />
                 </div>
 
-                <div className="mt-6 grid grid-cols-2 gap-3 shrink-0">
-                   <button onClick={() => setShowAdd(true)} className="bg-slate-100 text-slate-700 py-4 rounded-xl text-[10px] font-black tracking-widest hover:bg-slate-200 border border-slate-200/30 uppercase not-italic">AÑADIR ITEMS</button>
-                   <button onClick={() => setFase('pago')} className="bg-[#0a0913] text-white py-4 rounded-xl text-[10px] font-black tracking-widest hover:bg-blue-600 transition-all uppercase not-italic shadow-md">COBRAR CUENTA</button>
+                <div className="mt-8 grid grid-cols-2 gap-4">
+                   <button onClick={() => setShowAdd(true)} className="bg-white/5 text-white py-6 rounded-[2rem] text-[10px] font-black border border-white/5 hover:bg-white/10">AÑADIR</button>
+                   <button onClick={() => setFase('pago')} className="bg-blue-600 text-white py-6 rounded-[2rem] text-[10px] font-black shadow-xl shadow-blue-900/20">COBRAR CUENTA</button>
                 </div>
               </>
             ) : (
-              <div className="flex flex-col h-full items-center justify-center animate-in zoom-in-95 p-2">
-                 <h4 className="text-[10px] text-blue-600 tracking-[0.4em] mb-6 font-black not-italic">PASARELA DE PAGO</h4>
-                 <div className="text-5xl font-black text-slate-800 italic mb-8 tracking-tighter">S/ {parseFloat(pedidoSel.total).toFixed(2)}</div>
-                 
-                 <div className="grid grid-cols-2 gap-2 w-full mb-6">
+              <div className="flex flex-col h-full items-center justify-center animate-in zoom-in-95">
+                 <h4 className="text-[10px] text-blue-500 tracking-[0.5em] mb-10 font-black">PASARELA DE PAGO</h4>
+                 <div className="text-6xl font-black text-white italic mb-10 tracking-tighter">S/ {parseFloat(pedidoSel.total).toFixed(2)}</div>
+                 <div className="grid grid-cols-2 gap-2 w-full mb-8">
                     {['YAPE', 'EFECTIVO', 'TARJETA', 'IZIPAY'].map(m => (
-                      <button key={m} onClick={() => setMetodoPago(m)} className={`py-3 rounded-xl text-[9px] font-black border transition-all uppercase not-italic font-sans ${metodoPago === m ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200'}`}>{m}</button>
+                      <button key={m} onClick={() => setMetodoPago(m)} className={`py-4 rounded-2xl text-[10px] font-black border transition-all ${metodoPago === m ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white/5 border-white/10 text-slate-500'}`}>{m}</button>
                     ))}
                  </div>
-                 
-                 <div className="w-full space-y-3 mb-8">
-                    <input type="text" placeholder="DNI (8 DÍGITOS) O RUC (11 DÍGITOS)" className="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl text-slate-800 outline-none uppercase font-bold text-[11px] focus:bg-white focus:border-blue-500/30 transition-all" value={clienteExtra.documento} onChange={e => setClienteExtra({...clienteExtra, documento: e.target.value.replace(/\D/g,'')})} maxLength={11} />
-                    <input type="text" placeholder="NOMBRE / RAZÓN SOCIAL" className="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl text-slate-800 outline-none uppercase font-bold text-[11px] focus:bg-white focus:border-blue-500/30 transition-all" value={clienteExtra.nombre} onChange={e => setClienteExtra({...clienteExtra, nombre: e.target.value})} />
+                 <div className="w-full space-y-4 mb-10">
+                    <input type="text" placeholder="DNI (8 DÍGITOS) O RUC (11 DÍGITOS)" className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-white outline-none italic font-black text-xs" value={clienteExtra.documento} onChange={e => setClienteExtra({...clienteExtra, documento: e.target.value.replace(/\D/g,'')})} maxLength={11} />
+                    <input type="text" placeholder="NOMBRE / RAZÓN SOCIAL" className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-white outline-none uppercase italic font-black text-xs" value={clienteExtra.nombre} onChange={e => setClienteExtra({...clienteExtra, nombre: e.target.value})} />
                  </div>
-                 
-                 <div className="grid grid-cols-2 gap-3 w-full shrink-0">
-                    <button onClick={() => finalizarPago('BOLETA')} className="bg-emerald-600 text-white py-4 rounded-xl text-[10px] font-black uppercase shadow-md hover:bg-emerald-700 transition-all">Generar Boleta</button>
-                    <button onClick={() => finalizarPago('FACTURA')} className="bg-emerald-600 text-white py-4 rounded-xl text-[10px] font-black uppercase shadow-md hover:bg-emerald-700 transition-all">Generar Factura</button>
+                 <div className="grid grid-cols-2 gap-4 w-full">
+                    <button onClick={() => finalizarPago('BOLETA')} className="bg-emerald-600 text-white py-6 rounded-3xl text-[10px] font-black uppercase shadow-lg shadow-emerald-900/20">Boleta</button>
+                    <button onClick={() => finalizarPago('FACTURA')} className="bg-emerald-600 text-white py-6 rounded-3xl text-[10px] font-black uppercase shadow-lg shadow-emerald-900/20">Factura</button>
                  </div>
-                 <button onClick={() => setFase('detalle')} className="mt-6 text-slate-400 text-[10px] font-black uppercase underline tracking-widest not-italic">Atrás</button>
+                 <button onClick={() => setFase('detalle')} className="mt-8 text-slate-500 text-[10px] font-black uppercase underline tracking-widest">Atrás</button>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* MODAL DE ADICIÓN COMPLETA */}
       {showAdd && (
-        <div className="fixed inset-0 bg-white/95 backdrop-blur-md z-[1000] p-6 flex items-center justify-center animate-in zoom-in-95 duration-200">
-          <div className="w-full max-w-xl h-full max-h-[85vh] bg-white rounded-[3rem] border border-slate-100 p-6 md:p-8 shadow-2xl overflow-y-auto">
+        <div className="fixed inset-0 bg-black/98 z-[1000] p-10 flex items-center justify-center">
             <ComanderoCarta mesa={pedidoSel} isEditing={true} userLogueado={userLogueado} onClose={() => setShowAdd(false)} onSuccess={() => { setShowAdd(false); onUpdate(); setPedidoSel(null); }} />
-          </div>
         </div>
       )}
     </div>

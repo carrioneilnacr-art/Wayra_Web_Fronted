@@ -6,7 +6,7 @@ export const ComanderoCarta = ({ mesa, onClose, onSuccess, isEditing = false, us
   const [productos, setProductos] = useState([]);
   const [cat, setCat] = useState('MAKIS');
   const [carrito, setCarrito] = useState([]);
-  const [nota, setNota] = useState("");
+  const [nota, setNota] = useState(pedidoExistente?.observacion || "");
   const [enviando, setEnviando] = useState(false);
   
   const categorias = ['ENTRADAS', 'FONDOS', 'MAKIS', 'POSTRES', 'BEBIDAS'];
@@ -45,7 +45,12 @@ export const ComanderoCarta = ({ mesa, onClose, onSuccess, isEditing = false, us
   };
 
   const enviar = async () => {
-    if (carrito.length === 0) return alert("Selecciona al menos un plato");
+    const notaCambiada = nota.trim() !== (pedidoExistente?.observacion || "");
+    
+    if (carrito.length === 0 && !notaCambiada) {
+      return alert("Selecciona platos nuevos o modifica la nota para actualizar.");
+    }
+
     setEnviando(true);
     try {
       if (isEditing) {
@@ -54,6 +59,7 @@ export const ComanderoCarta = ({ mesa, onClose, onSuccess, isEditing = false, us
           pedidoService.crearPedido({ ...item, id_pedido_existente: mesa.id_pedido, modo: 'agregar' })
         );
         await Promise.all(promesas);
+
       } else {
         await pedidoService.crearPedido({
           id_mesa: mesa.id_mesa,
@@ -65,10 +71,9 @@ export const ComanderoCarta = ({ mesa, onClose, onSuccess, isEditing = false, us
         });
       }
       onSuccess();
-      onClose();
     } catch (e) { 
       console.error("Error al enviar comanda:", e);
-      alert("No se pudo enviar el pedido. Verifica la conexión con Render.");
+      alert("No se pudo enviar el pedido. Verifica la conexión.");
     } finally {
       setEnviando(false);
     }
@@ -160,7 +165,66 @@ export const ComanderoCarta = ({ mesa, onClose, onSuccess, isEditing = false, us
             {enviando ? 'SINCRONIZANDO...' : 'ENVIAR A COCINA 🚀'}
           </button>
         </div>
-      )}
+
+        {/* LADO DERECHO: TICKET / CARRITO DE ESTA OPERACIÓN */}
+        <div className="w-[300px] md:w-[350px] lg:w-[380px] bg-white flex flex-col shrink-0 border-l border-slate-200">
+          <div className="p-6 bg-slate-50/50 border-b border-slate-100">
+            <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest">Resumen a enviar</h3>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
+            {carrito.length === 0 ? (
+               <div className="h-full flex flex-col items-center justify-center text-slate-400">
+                  <span className="text-4xl mb-3">🍽️</span>
+                  <p className="text-sm font-medium">Aún no has agregado platos</p>
+               </div>
+            ) : (
+               <div className="space-y-3">
+                  {carrito.map((i) => (
+                    <div key={i.id_producto} className="flex justify-between items-center p-3 hover:bg-slate-50 rounded-xl transition-colors group border border-transparent hover:border-slate-100">
+                      <div className="flex items-center gap-3">
+                         <span className="text-xs font-semibold bg-slate-100 text-slate-600 px-2 py-1 rounded-md">{i.cantidad}</span>
+                         <span className="text-sm font-medium text-slate-900 line-clamp-2">{i.nombre}</span>
+                      </div>
+                      <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                        <button onClick={() => quitarUno(i.id_producto)} className="bg-red-50 text-red-500 w-8 h-8 rounded-lg font-bold flex items-center justify-center hover:bg-red-500 hover:text-white transition-all">-</button>
+                        <button onClick={() => agregar(i)} className="bg-teal-50 text-teal-600 w-8 h-8 rounded-lg font-bold flex items-center justify-center hover:bg-teal-600 hover:text-white transition-all">+</button>
+                      </div>
+                    </div>
+                  ))}
+               </div>
+            )}
+          </div>
+
+          <div className="p-6 border-t border-slate-200 bg-slate-50 shrink-0">
+             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">
+                {pedidoExistente ? "Editar Nota a Cocina:" : "Nota a Cocina:"}
+             </label>
+             <textarea 
+                placeholder="Ej. Sin picante, bien cocido..."
+                className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm text-slate-800 placeholder-slate-400 mb-4 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none h-20 resize-none font-medium transition-all"
+                value={nota}
+                onChange={(e) => setNota(e.target.value)}
+             />
+             
+             {carrito.length > 0 && (
+                <div className="flex justify-between items-center mb-4">
+                   <span className="text-sm font-semibold text-slate-500">Subtotal</span>
+                   <span className="text-xl font-bold text-slate-900">+ S/ {carrito.reduce((a, b) => a + parseFloat(b.subtotal), 0).toFixed(2)}</span>
+                </div>
+             )}
+
+             <button 
+                onClick={enviar} 
+                disabled={enviando || (carrito.length === 0 && nota.trim() === (pedidoExistente?.observacion || ""))} 
+                className={`w-full py-4 rounded-xl font-bold text-sm tracking-wide transition-all shadow-sm
+                  ${enviando || (carrito.length === 0 && nota.trim() === (pedidoExistente?.observacion || "")) ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-teal-600 text-white hover:bg-teal-700 hover:shadow-teal-600/20 shadow-md'}`}
+             >
+                {enviando ? 'PROCESANDO...' : pedidoExistente ? 'ACTUALIZAR COMANDA' : 'ENVIAR A COCINA'}
+             </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
