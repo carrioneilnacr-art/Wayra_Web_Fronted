@@ -1,58 +1,32 @@
 import React from 'react';
-import { reservaService } from '../../services/reservaService';
 
-const CardMesaMozo = ({ mesa, onClick, onRefresh }) => {
-  const esLimpieza = mesa.estado === 'limpieza';
-  const esOcupada = mesa.estado === 'ocupada';
-
-  const liberarMesa = async (e) => {
-    e.stopPropagation(); // Evita disparar el onClick de la tarjeta contenedora
-    
-    if (window.confirm("¿Confirmas que la mesa ya está limpia para nuevos clientes?")) {
-      try {
-        // ✅ ARQUITECTURA SENIOR: Consumo abstracto desde la capa de servicios unificada
-        await reservaService.liberarMesaLimpieza(mesa.id_mesa);
-        
-        if (onRefresh) onRefresh(); 
-      } catch (error) {
-        console.error("Error al liberar la mesa:", error);
-        alert("No se pudo liberar la mesa. Revisa la conexión.");
-      }
-    }
-  };
+const CardMesaMozo = ({ mesa, isSelected, onClick }) => {
+  const isOcupada = mesa.estado === 'ocupada';
+  const isReservada = mesa.estado === 'reservada';
 
   return (
-    <div 
-      onClick={esLimpieza ? null : onClick}
-      className={`relative p-5 rounded-[2.2rem] border transition-all flex flex-col items-center justify-center gap-2 h-32 shadow-[0_2px_8px_rgba(0,0,0,0.01)]
-        ${esLimpieza 
-          ? 'bg-orange-50/60 border-orange-200 text-orange-700 animate-pulse cursor-default' 
-          : esOcupada 
-            ? 'bg-rose-50/50 border-rose-100 text-rose-600 cursor-pointer hover:border-rose-300' 
-            : 'bg-white border-slate-100 text-slate-400 hover:border-blue-500/40 cursor-pointer'}`}
-    >
-      {/* Indicador de número de mesa flotante y elástico */}
-      <span className="absolute -top-2 -right-2 bg-slate-900 text-white w-8 h-8 rounded-full flex items-center justify-center font-black italic text-[10px] shadow-md border-2 border-white not-italic font-sans">
-        #{mesa.numero_mesa || mesa.id_mesa}
-      </span>
-
-      <span className="text-3xl select-none">{esLimpieza ? '🧼' : esOcupada ? '🍣' : '🪑'}</span>
-      
-      <p className={`text-[9px] font-black tracking-widest uppercase font-sans not-italic
-        ${esLimpieza ? 'text-orange-600' : esOcupada ? 'text-rose-600' : 'text-slate-400'}`}>
-        {esLimpieza ? 'LIMPIEZA' : esOcupada ? 'OCUPADA' : 'LIBRE'}
-      </p>
-      
-      {esLimpieza && (
-        <button 
-          onClick={liberarMesa}
-          className="mt-1 bg-orange-500 hover:bg-orange-600 text-white text-[8px] px-3 py-1.5 rounded-xl font-black transition-all shadow-sm uppercase not-italic tracking-wider font-sans active:scale-95 z-20"
-        >
-          LISTA ✅
-        </button>
-      )}
+    <div onClick={onClick} className={`h-[140px] p-6 rounded-xl flex flex-col justify-between border-2 transition-all cursor-pointer ${
+      isSelected ? 'border-[#1a1a1a] bg-white' : 
+      isOcupada ? 'border-[#1a1a1a] bg-[#1a1a1a]' : 
+      isReservada ? 'border-[#b07d62] bg-[#fcfaf7]' : 'border-slate-200 bg-white hover:border-slate-300'
+    }`}>
+      <div className="flex justify-between items-start">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${isOcupada ? 'bg-rose-500' : isReservada ? 'bg-orange-500' : 'bg-emerald-500'}`}></div>
+          <span className={`text-[9px] font-bold uppercase tracking-widest ${isOcupada ? 'text-rose-400' : isReservada ? 'text-orange-400' : 'text-slate-400'}`}>
+            {isOcupada ? 'Uso' : isReservada ? 'Reserva' : 'Libre'}
+          </span>
+        </div>
+        <div className="flex gap-1">
+          {[...Array(mesa.capacidad || 4)].map((_, i) => (
+            <div key={i} className={`w-1 h-3 rounded-sm ${isOcupada ? 'bg-white/20' : 'bg-slate-200'}`}></div>
+          ))}
+        </div>
+      </div>
+      <h3 className={`text-4xl tracking-tighter ${isOcupada ? 'text-white font-medium' : isReservada ? 'text-[#1a1a1a] italic' : 'text-slate-300 font-extralight'}`}>
+        {mesa.numero_mesa || mesa.id_mesa}
+      </h3>
     </div>
   );
 };
-
 export default CardMesaMozo;

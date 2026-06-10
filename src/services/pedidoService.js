@@ -28,6 +28,11 @@ export const pedidoService = {
     const res = await wayraApi.get(`/mozo/pedidos/estatus?id_mozo=${idMozo}`);
     return res.data;
   },
+// 🌟 NUEVO: Actualizar la nota/observación de un pedido activo
+  actualizarObservacion: async (idPedido, observacion) => {
+    const res = await wayraApi.put(`/pedidos/${idPedido}/observacion`, { observacion });
+    return res.data;
+  },
   // 5. Procesar el cobro e integración IZIPAY
   pagarPedido: async (idPedido) => {
     const res = await wayraApi.put(`/pedidos/${idPedido}/pagar`);
@@ -51,4 +56,5 @@ export const pedidoService = {
     const res = await wayraApi.put(`/pedidos/${idPedido}/checkout`, datosCheckout);
     return res.data;
   }
+  
 };
