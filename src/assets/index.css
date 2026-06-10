@@ -149,3 +149,27 @@ body {
     font-family: 'Montserrat', sans-serif !important;
     color: var(--sumi-ink) !important;
 }
+/* Filtros Globales de Accesibilidad */
+.cb-protanopia {
+  filter: hue-rotate(30deg) saturate(120%) contrast(110%);
+}
+.cb-deuteranopia {
+  filter: hue-rotate(90deg) saturate(120%);
+}
+.cb-tritanopia {
+  filter: hue-rotate(180deg) saturate(130%);
+}
+.cb-high-contrast {
+  filter: contrast(180%) brightness(100%);
+}
+/* 🌊 TRUCO DEL FILTRO INVERTIDO */
+html.dark {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* 🖼️ Evitamos que las imágenes y logos se vean como un negativo de fotografía */
+html.dark img,
+html.dark svg,
+html.dark .no-invert {
+  filter: invert(1) hue-rotate(180deg);
+}

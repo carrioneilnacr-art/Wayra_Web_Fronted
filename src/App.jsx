@@ -9,6 +9,10 @@ import DashboardRecepcion from "./pages/DashboardRecepcion";
 import DashboardMozo from "./pages/DashboardMozo";
 import DashboardAdmin from "./pages/DashboardAdmin"; 
 
+// 🌟 Importaciones de Accesibilidad (NUEVO)
+import { AccessibilityProvider } from "./context/AccessibilityContext";
+import { AccessibilityWidget } from "./components/ui/AccessibilityWidget";
+
 function App() {
   // ✅ CONSUMO SENIOR: Centralizamos la sesión leyendo desde la capa Context global
   const { user, isAuth, login, logout } = useContext(AuthContext);
@@ -27,22 +31,21 @@ function App() {
     }
   };
 
-  // 🔒 FLUJO DE RUTAS PÚBLICAS (NO AUTENTICADO)
-  if (!isAuth) {
-    return (
-      <Router>
+  // 🛤️ Función interna para separar las rutas limpiamente y no perder el estado de accesibilidad
+  const AppRoutes = () => {
+    // 🔒 FLUJO DE RUTAS PÚBLICAS (NO AUTENTICADO)
+    if (!isAuth) {
+      return (
         <Routes>
           {/* El Login ahora recibe la función de login del context para guardar usuario + token */}
           <Route path="/" element={<Login onLogin={login} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </Router>
-    );
-  }
+      );
+    }
 
-  // 🛡️ FLUJO DE RUTAS PROTEGIDAS POR ROL (AUTENTICADO)
-  return (
-    <Router>
+    // 🛡️ FLUJO DE RUTAS PROTEGIDAS POR ROL (AUTENTICADO)
+    return (
       <Routes>
         {/* Redirección inicial atómica según rol */}
         <Route 
@@ -71,7 +74,19 @@ function App() {
         {/* Captura de rutas inexistentes redirigiendo al dashboard correspondiente */}
         <Route path="*" element={<Navigate to={getRedirectPath(user?.rol)} replace />} />
       </Routes>
-    </Router>
+    );
+  };
+
+  return (
+    // 🌟 Envolvemos TODA la aplicación con el proveedor de accesibilidad
+    <AccessibilityProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+      
+      {/* 🌟 El Widget flotante queda fuera del Router para que siempre esté visible en cualquier pantalla */}
+      <AccessibilityWidget />
+    </AccessibilityProvider>
   );
 }
 
