@@ -1,39 +1,47 @@
-# 🥢 Wayra Nikkei - Backend API
+# 🥢 Wayra Nikkei - Frontend Web
 
-API RESTful desarrollada para la gestión integral del restaurante Wayra Nikkei. Este sistema maneja la disponibilidad de mesas, control de reservas, procesamiento de comandas transaccionales y panel de métricas para el staff.
+Interfaz de usuario (UI) para la gestión operativa y administrativa del restaurante Wayra Nikkei. Aplicación web diseñada con un enfoque modular, rápido y reactivo para conectar al personal (recepción, salón y administración) con las operaciones en tiempo real.
 
 ## 🚀 Tecnologías Utilizadas
 
-* **Entorno:** Node.js
-* **Framework:** Express.js
-* **Base de Datos:** MySQL (Desplegada en Railway)
-* **Arquitectura:** Modelo-Vista-Controlador (MVC) Orientada a Servicios
+* **Librería Principal:** React.js
+* **Estilos y UI:** Tailwind CSS
+* **Cliente HTTP:** Axios
+* **Gestión de Estado y Lógica:** Custom Hooks
+* **Infraestructura Cloud:** Vercel (Frontend) y Railway (Backend)
 
-## 🏗️ Estructura del Proyecto (Arquitectura en Capas)
+## 🏗️ Estructura del Proyecto
 
-El código está estructurado para garantizar escalabilidad y separación de responsabilidades:
+La arquitectura del frontend está diseñada en espejo con el backend, garantizando una separación limpia entre las vistas y la lógica de datos:
 
-* **`/config`**: Conexión asíncrona a la base de datos (Pool de MySQL).
-* **`/routes`**: Definición de endpoints de la API.
-* **`/controllers`**: Manejo de peticiones HTTP (Req/Res).
-* **`/services`**: Lógica de negocio pura y consultas SQL parametrizadas (ACID).
+* **`/api`**: Instancia centralizada de configuración de Axios y variables globales.
+* **`/services`**: Funciones aisladas que realizan las llamadas HTTP a los endpoints del servidor (`mesaService`, `pedidoService`, etc.).
+* **`/hooks`**: Custom Hooks que manejan los estados de la aplicación y encapsulan la lógica de negocio de la UI.
+* **`/components`**: Componentes visuales estilizados con Tailwind CSS, reutilizables y modulares (Tarjetas de Mesas, Modales, Botones).
+* **`/pages`** *(o `/views`)*: Vistas principales que agrupan componentes según el rol (Dashboard Admin, Interfaz Mozo, Recepción).
 
 ## ⚙️ Instalación y Configuración Local
 
 1. Clona este repositorio:
    \`\`\`bash
-   git clone https://github.com/TU-USUARIO/Wayra_Web_Backend.git
+   git clone https://github.com/TU-USUARIO/Wayra_Web_Frontend.git
    \`\`\`
 2. Instala las dependencias:
    \`\`\`bash
    npm install
    \`\`\`
-3. Crea un archivo \`.env\` en la raíz del proyecto y agrega tu URL de conexión:
+3. Configura las variables de entorno. Crea un archivo \`.env\` en la raíz y agrega la URL de tu backend local y de producción:
    \`\`\`env
-   DATABASE_URL="mysql://usuario:password@host:puerto/database"
-   PORT=3000
+   # En local usarás localhost, en producción apuntará a Railway
+   VITE_API_URL=http://localhost:3000/api 
    \`\`\`
-4. Inicia el servidor:
+   *(Nota: Usa `REACT_APP_API_URL` si tu proyecto usa Create React App en lugar de Vite).*
+
+4. Inicia el servidor de desarrollo:
    \`\`\`bash
-   npm start
+   npm run dev
    \`\`\`
+
+## ☁️ Despliegue en Producción
+
+El proyecto está desplegado de forma continua (CI/CD) utilizando **Vercel**. Cualquier integración de código en la rama principal actualiza automáticamente la aplicación en vivo, garantizando alta disponibilidad y tiempos de carga óptimos para el equipo del restaurante.
