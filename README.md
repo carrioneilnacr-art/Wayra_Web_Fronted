@@ -1,5 +1,5 @@
 # 🥢 Wayra Nikkei - Frontend Web
-
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white) ![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white)
 Interfaz de usuario (UI) para la gestión operativa y administrativa del restaurante Wayra Nikkei. Aplicación web diseñada con un enfoque modular, rápido y reactivo para conectar al personal (recepción, salón y administración) con las operaciones en tiempo real.
 
 ## 🚀 Tecnologías Utilizadas
