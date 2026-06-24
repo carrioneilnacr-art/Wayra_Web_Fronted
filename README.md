@@ -1,21 +1,39 @@
-<<<<<<< HEAD
-# React + Vite
+# 🥢 Wayra Nikkei - Backend API
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+API RESTful desarrollada para la gestión integral del restaurante Wayra Nikkei. Este sistema maneja la disponibilidad de mesas, control de reservas, procesamiento de comandas transaccionales y panel de métricas para el staff.
 
-Currently, two official plugins are available:
+## 🚀 Tecnologías Utilizadas
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+* **Entorno:** Node.js
+* **Framework:** Express.js
+* **Base de Datos:** MySQL (Desplegada en Railway)
+* **Arquitectura:** Modelo-Vista-Controlador (MVC) Orientada a Servicios
 
-## React Compiler
+## 🏗️ Estructura del Proyecto (Arquitectura en Capas)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+El código está estructurado para garantizar escalabilidad y separación de responsabilidades:
 
-## Expanding the ESLint configuration
+* **`/config`**: Conexión asíncrona a la base de datos (Pool de MySQL).
+* **`/routes`**: Definición de endpoints de la API.
+* **`/controllers`**: Manejo de peticiones HTTP (Req/Res).
+* **`/services`**: Lógica de negocio pura y consultas SQL parametrizadas (ACID).
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-=======
-# Wayra_Web_Fronted
-Trabajo para Calidad de Software
->>>>>>> ae5d5a9ddfcc5071e99a3114a0b7c351d8fd6001
+## ⚙️ Instalación y Configuración Local
+
+1. Clona este repositorio:
+   \`\`\`bash
+   git clone https://github.com/TU-USUARIO/Wayra_Web_Backend.git
+   \`\`\`
+2. Instala las dependencias:
+   \`\`\`bash
+   npm install
+   \`\`\`
+3. Crea un archivo \`.env\` en la raíz del proyecto y agrega tu URL de conexión:
+   \`\`\`env
+   DATABASE_URL="mysql://usuario:password@host:puerto/database"
+   PORT=3000
+   \`\`\`
+4. Inicia el servidor:
+   \`\`\`bash
+   npm start
+   \`\`\`
