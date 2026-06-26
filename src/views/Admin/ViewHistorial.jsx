@@ -80,7 +80,7 @@ export const ViewHistorial = () => {
                 
                 {/* TOTAL COMPENSADO */}
                 <td className="py-5 px-6 text-slate-900 font-black text-xs not-italic font-sans">
-                  S/ {parseFloat(p.total).toFixed(2)}
+                  S/ {Number.parseFloat(p.total).toFixed(2)}
                 </td>
                 
                 {/* ACCIONES: BOTÓN MINIMALISTA */}

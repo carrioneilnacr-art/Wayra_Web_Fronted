@@ -93,7 +93,7 @@ export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTic
               <div className="mt-auto">
                 <div className="flex justify-between items-end mb-2">
                   <p className="text-sm text-slate-500">{p.items?.length || 0} items</p>
-                  <p className="text-lg font-semibold text-slate-900">S/ {parseFloat(p.total).toFixed(2)}</p>
+                  <p className="text-lg font-semibold text-slate-900">S/ {Number.parseFloat(p.total).toFixed(2)}</p>
                 </div>
                 <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                   <div className={`h-full transition-all duration-1000 ${progreso > 75 ? 'bg-orange-400' : 'bg-teal-500'}`} style={{ width: `${progreso}%` }}></div>
@@ -149,7 +149,7 @@ export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTic
             <div className="p-6 bg-white border-t border-slate-200 shrink-0">
                <div className="flex justify-between items-center mb-4">
                  <span className="text-sm font-medium text-slate-500">Total a pagar</span>
-                 <span className="text-2xl font-bold text-slate-900">S/ {parseFloat(pedidoSel.total).toFixed(2)}</span>
+                 <span className="text-2xl font-bold text-slate-900">S/ {Number.parseFloat(pedidoSel.total).toFixed(2)}</span>
                </div>
                <div className="grid grid-cols-2 gap-3">
                   {/* LÓGICA CORREGIDA: Se envía el pedidoSel completo al componente padre (ViewMesasMozo) */}

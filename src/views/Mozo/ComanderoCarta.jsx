@@ -67,7 +67,7 @@ export const ComanderoCarta = ({ mesa, onClose, onSuccess, pedidoExistente, user
           nombre_cliente: "CLIENTE DIRECTO",
           items: carrito,
           observacion: nota,
-          total: carrito.reduce((a, b) => a + parseFloat(b.subtotal), 0)
+          total: carrito.reduce((a, b) => a + Number.parseFloat(b.subtotal), 0)
         });
       }
       onSuccess();
@@ -115,12 +115,12 @@ export const ComanderoCarta = ({ mesa, onClose, onSuccess, pedidoExistente, user
           {/* Grilla Productos */}
           <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {productos.filter(p => p.categoria?.toUpperCase() === cat.toUpperCase() && parseInt(p.estado) === 1).map(p => (
+              {productos.filter(p => p.categoria?.toUpperCase() === cat.toUpperCase() && Number.parseInt(p.estado) === 1).map(p => (
                 <div key={p.id_producto} className="bg-white p-5 rounded-2xl border border-slate-200 flex justify-between items-center shadow-sm hover:shadow-md hover:border-teal-200 transition-all cursor-pointer min-h-[80px]" onClick={() => agregar(p)}>
                   <div className="min-w-0 pr-3 w-full">
                     {/* 2. Solución visual: line-clamp-2 reemplaza a truncate para permitir múltiples líneas */}
                     <p className="font-semibold text-slate-900 text-sm leading-tight line-clamp-2 mb-1.5">{p.nombre}</p>
-                    <p className="text-slate-500 font-medium text-sm">S/ {parseFloat(p.precio).toFixed(2)}</p>
+                    <p className="text-slate-500 font-medium text-sm">S/ {Number.parseFloat(p.precio).toFixed(2)}</p>
                   </div>
                   <button className="bg-slate-50 text-slate-600 border border-slate-200 w-10 h-10 rounded-xl font-medium text-xl flex items-center justify-center shrink-0 transition-colors pointer-events-none">
                     +
@@ -175,7 +175,7 @@ export const ComanderoCarta = ({ mesa, onClose, onSuccess, pedidoExistente, user
              {carrito.length > 0 && (
                 <div className="flex justify-between items-center mb-4">
                    <span className="text-sm font-semibold text-slate-500">Subtotal</span>
-                   <span className="text-xl font-bold text-slate-900">+ S/ {carrito.reduce((a, b) => a + parseFloat(b.subtotal), 0).toFixed(2)}</span>
+                   <span className="text-xl font-bold text-slate-900">+ S/ {carrito.reduce((a, b) => a + Number.parseFloat(b.subtotal), 0).toFixed(2)}</span>
                 </div>
              )}
 

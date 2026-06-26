@@ -2,7 +2,7 @@ import React from 'react';
 
 export const CardProducto = ({ producto, onAction, actionLabel = "+", showStock = true }) => {
   const { nombre, precio, categoria, estado } = producto;
-  const esDisponible = parseInt(estado) === 1;
+  const esDisponible = Number.parseInt(estado) === 1;
 
   return (
     <div className={`bg-white p-4 rounded-[2rem] border transition-all flex justify-between items-center h-20 shadow-[0_2px_8px_rgba(0,0,0,0.01)]
@@ -13,12 +13,12 @@ export const CardProducto = ({ producto, onAction, actionLabel = "+", showStock 
           {categoria}
         </span>
         <p className="font-black text-slate-800 text-xs truncate uppercase tracking-wide">{nombre}</p>
-        <p className="text-blue-600 font-black text-[10px] mt-0.5 tracking-wider font-mono">S/ {parseFloat(precio).toFixed(2)}</p>
+        <p className="text-blue-600 font-black text-[10px] mt-0.5 tracking-wider font-mono">S/ {Number.parseFloat(precio).toFixed(2)}</p>
       </div>
 
       {onAction && esDisponible && (
         <button 
-          onClick={() => onAction(producto)}
+          on  Click={() => onAction(producto)}
           className="bg-slate-900 text-white font-sans font-black text-sm w-10 h-10 rounded-xl flex items-center justify-center hover:bg-blue-600 transition-all shadow-sm active:scale-95 shrink-0"
         >
           {actionLabel}

@@ -5,6 +5,12 @@ const Login = ({ onLogin }) => {
   const [error, setError] = useState("");
   const cardRef = useRef(null);
 
+
+  const getSecureRandom = () => {
+    const array = new Uint32Array(1);
+    window.crypto.getRandomValues(array);
+    return array[0] / (0xFFFFFFFF + 1);
+  };
   // 1. Lógica para el efecto Tilt 3D
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -13,7 +19,7 @@ const Login = ({ onLogin }) => {
       const y = e.clientY / window.innerHeight - 0.5;
       cardRef.current.style.transform = `rotateY(${x * 8}deg) rotateX(${y * -8}deg)`;
     };
-    const handleMouseLeave = () => {
+    const handleMouseLeave = () => {    
       if (cardRef.current) cardRef.current.style.transform = `rotateY(0deg) rotateX(0deg)`;
     };
     document.addEventListener("mousemove", handleMouseMove);
@@ -30,12 +36,13 @@ const Login = ({ onLogin }) => {
     const container = document.getElementById("dust-container");
     if (!container) return;
 
-    for (let i = 0; i < particleCount; i++) {
+   for (let i = 0; i < particleCount; i++) {
       let dust = document.createElement('div');
       dust.className = 'flavor-dust';
-      dust.style.left = Math.random() * 100 + 'vw';
-      dust.style.setProperty('--t', (Math.random() * 15 + 15) + 's');
-      dust.style.animationDelay = (Math.random() * 10) + 's';
+      // Usamos getSecureRandom() en lugar de Math.random()
+      dust.style.left = getSecureRandom() * 100 + 'vw';
+      dust.style.setProperty('--t', (getSecureRandom() * 15 + 15) + 's');
+      dust.style.animationDelay = (getSecureRandom() * 10) + 's';
       container.appendChild(dust);
     }
   }, []);
@@ -43,7 +50,7 @@ const Login = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://wayra-web-backend.onrender.com/api/login", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

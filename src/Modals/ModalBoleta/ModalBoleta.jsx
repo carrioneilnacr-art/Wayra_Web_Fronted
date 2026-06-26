@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types'; // 1. Importa esto
 import { pedidoService } from '../../services/pedidoService';
 
 const ModalBoleta = ({ idPedido, onClose }) => {
@@ -85,7 +86,7 @@ const ModalBoleta = ({ idPedido, onClose }) => {
                 <tr key={index} className="border-b border-slate-100/60">
                   <td className="py-3.5 font-bold text-[#b07d62]">{item.cantidad}</td>
                   <td className="py-3.5 font-medium uppercase truncate max-w-[180px]">{item.producto}</td>
-                  <td className="py-3.5 text-right font-bold font-mono text-slate-800">S/ {parseFloat(item.subtotal).toFixed(2)}</td>
+                  <td className="py-3.5 text-right font-bold font-mono text-slate-800">S/ {Number.parseFloat(item.subtotal).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -93,9 +94,9 @@ const ModalBoleta = ({ idPedido, onClose }) => {
 
           {/* TOTAL GENERAL */}
           <div className="flex justify-between items-center mb-8 border-t border-slate-100 pt-4">
-            <span className="text-[8px] tracking-[0.5em] uppercase text-[#b07d62] font-black italic">Total General</span>
+            <span className="text-[8px] trackin g-[0.5em] uppercase text-[#b07d62] font-black italic">Total General</span>
             <span className="text-2xl font-black tracking-tighter text-slate-900 font-sans">
-              S/ {parseFloat(data.pedido?.total).toFixed(2)}
+              S/ {Number.parseFloat(data.pedido?.total).toFixed(2)}
             </span>
           </div>
 
@@ -126,5 +127,8 @@ const ModalBoleta = ({ idPedido, onClose }) => {
     </div>
   );
 };
-
+ModalBoleta.propTypes = {
+  idPedido: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  onClose: PropTypes.func.isRequired,
+};
 export default ModalBoleta;

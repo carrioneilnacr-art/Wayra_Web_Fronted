@@ -26,7 +26,7 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSelecciona
 
   const turnosOcupados = todasLasReservas
     .filter(r => {
-      const mismaMesa = parseInt(r.id_mesa) === parseInt(form.id_mesa);
+      const mismaMesa = Number.parseInt(r.id_mesa) === Number.parseInt(form.id_mesa);
       const mismaFecha = r.fecha_reserva.split('T')[0] === form.fecha_reserva;
       const noEsLaMismaQueEdito = r.id_reserva !== reservaEdit?.id_reserva;
       const noEstaCancelada = r.estado_reserva !== 'cancelada';
@@ -113,7 +113,7 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas, fechaSelecciona
             {/* ✅ gridTurnos mapeado nativamente a CSS Grid de Tailwind */}
             <div className="grid grid-cols-3 gap-2">
               {turnos.map(t => {
-                const horaTurnoNum = parseInt(t.hora.replace(':', ''));
+                const horaTurnoNum = Number.parseInt(t.hora.replace(':', ''));
                 const ocupado = turnosOcupados.includes(t.hora);
                 const yaPaso = form.fecha_reserva === hoyStr && horaTurnoNum < horaActualNum;
                 const bloqueado = ocupado || yaPaso;

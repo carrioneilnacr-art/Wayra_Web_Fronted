@@ -140,7 +140,7 @@ export const ViewCarta = () => {
           .filter(p => catSel === "TODOS" || p.categoria.toUpperCase() === catSel.toUpperCase())
           .filter(p => p.nombre.toLowerCase().includes(busqueda.toLowerCase()))
           .map(p => {
-            const esDisponible = parseInt(p.estado) === 1;
+            const esDisponible = Number.parseInt(p.estado) === 1;
 
             return (
               <div 
@@ -156,7 +156,7 @@ export const ViewCarta = () => {
                   <div className="min-w-0">
                     <p className="text-[#2C3E50] font-black text-xs uppercase tracking-wider truncate">{p.nombre}</p>
                     <p className="text-[9px] text-[#7F8C8D] font-bold tracking-widest mt-0.5 uppercase truncate">
-                      {p.categoria} • <span className="text-emerald-600 font-extrabold">S/ {parseFloat(p.precio).toFixed(2)}</span>
+                      {p.categoria} • <span className="text-emerald-600 font-extrabold">S/ {Number.parseFloat(p.precio).toFixed(2)}</span>
                     </p>
                     <p className="text-[8px] text-slate-400 font-semibold mt-0.5 tracking-wider">⏱️ {p.tiempo_estimado} MIN</p>
                   </div>

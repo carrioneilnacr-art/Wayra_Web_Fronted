@@ -53,7 +53,7 @@ const ListaPedidos = ({ pedidos = [], onUpdate }) => {
               </p>
               
               <p className="text-[12px] text-slate-800 font-black mt-2 font-sans not-italic">
-                TOTAL: <span className="text-emerald-600 font-extrabold font-sans">S/ {parseFloat(pedido.total).toFixed(2)}</span>
+                TOTAL: <span className="text-emerald-600 font-extrabold font-sans">S/ {Number.parseFloat(pedido.total).toFixed(2)}</span>
               </p>
             </div>
             

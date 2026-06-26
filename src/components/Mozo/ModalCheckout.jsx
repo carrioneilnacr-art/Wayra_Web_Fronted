@@ -91,10 +91,14 @@ export default function ModalCheckout({ pedido, reservas, onClose, onSuccess }) 
               <button onClick={() => setTipoDoc('FACTURA')} className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${tipoDoc === 'FACTURA' ? 'bg-white shadow-sm text-[#1a1a1a]' : 'text-slate-400'}`}>Factura</button>
             </div>
             
-            <div className="space-y-4">
+              <div className="space-y-4">
               <div>
-                <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">{tipoDoc === 'FACTURA' ? 'RUC (11 dígitos)' : 'DNI (8 dígitos)'}</label>
+                {/* ✅ Agregamos htmlFor */}
+                <label htmlFor="doc-input" className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                  {tipoDoc === 'FACTURA' ? 'RUC (11 dígitos)' : 'DNI (8 dígitos)'}
+                </label>
                 <input 
+                  id="doc-input" // ✅ Agregamos id
                   type="text" 
                   value={documento} 
                   onChange={handleDocChange} 
@@ -104,20 +108,28 @@ export default function ModalCheckout({ pedido, reservas, onClose, onSuccess }) 
               </div>
               
               <div>
-                <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">{tipoDoc === 'FACTURA' ? 'Razón Social' : 'Nombres Completos'}</label>
-                <input 
-                  type="text" 
-                  value={nombre} 
-                  onChange={handleNombreChange} 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 mt-1 font-bold text-slate-700 uppercase outline-none focus:border-[#c5a059] transition-colors" 
-                  placeholder={tipoDoc === 'FACTURA' ? "Nombre de la empresa" : "Nombres y apellidos"} 
-                />
-              </div>
+              {/* ✅ Agregamos htmlFor */}
+              <label htmlFor="nombre-input" className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                {tipoDoc === 'FACTURA' ? 'Razón Social' : 'Nombres Completos'}
+              </label>
+              <input 
+                id="nombre-input" // ✅ Agregamos id
+                type="text" 
+                value={nombre} 
+                onChange={handleNombreChange} 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 mt-1 font-bold text-slate-700 uppercase outline-none focus:border-[#c5a059] transition-colors" 
+                placeholder={tipoDoc === 'FACTURA' ? "Nombre de la empresa" : "Nombres y apellidos"} 
+              />
+            </div>
 
-              {tipoDoc === 'FACTURA' && (
+               {tipoDoc === 'FACTURA' && (
                 <div className="animate-in fade-in slide-in-from-top-2">
-                  <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Dirección Fiscal</label>
+                  {/* ✅ Agregamos htmlFor */}
+                  <label htmlFor="dir-input" className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                    Dirección Fiscal
+                  </label>
                   <input 
+                    id="dir-input" // ✅ Agregamos id
                     type="text" 
                     value={direccion} 
                     onChange={(e) => setDireccion(e.target.value)} 
@@ -253,7 +265,7 @@ export default function ModalCheckout({ pedido, reservas, onClose, onSuccess }) 
                   <tr key={index} className="border-b border-slate-100/60">
                     <td className="py-3 font-bold text-[#b07d62]">{item.cantidad}</td>
                     <td className="py-3 font-medium uppercase truncate max-w-[180px]">{item.nombre || item.producto}</td>
-                    <td className="py-3 text-right font-bold font-mono text-slate-800">S/ {parseFloat(item.subtotal).toFixed(2)}</td>
+                    <td className="py-3 text-right font-bold font-mono text-slate-800">S/ {Number.parseFloat(item.subtotal).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -262,7 +274,7 @@ export default function ModalCheckout({ pedido, reservas, onClose, onSuccess }) 
             <div className="flex justify-between items-center mb-6 border-t border-slate-100 pt-4">
               <span className="text-[8px] tracking-[0.5em] uppercase text-[#b07d62] font-black italic">Total</span>
               <span className="text-2xl font-black tracking-tighter text-slate-900 font-sans">
-                S/ {parseFloat(pedido.total).toFixed(2)}
+                S/ {Number.parseFloat(pedido.total).toFixed(2)}
               </span>
             </div>
 

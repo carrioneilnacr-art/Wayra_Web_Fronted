@@ -181,7 +181,7 @@ export const ViewStats = () => {
                 {data.rendimientoMozos.map((mozo, idx) => (
                   <tr key={idx} className="border-b border-slate-50 hover:bg-[#F8F9FA] transition-all">
                     <td className="py-3.5 font-bold">{mozo.nombre}</td>
-                    <td className="py-3.5 text-right font-black text-emerald-600">S/ {parseFloat(mozo.total_vendido).toFixed(2)}</td>
+                    <td className="py-3.5 text-right font-black text-emerald-600">S/ {Number.parseFloat(mozo.total_vendido).toFixed(2)}</td>
                     <td className="py-3.5 pl-6">
                       <div className="flex items-center justify-end space-x-2">
                         <span className="text-[10px] text-[#7F8C8D] font-bold">{mozo.mesas} ord.</span>

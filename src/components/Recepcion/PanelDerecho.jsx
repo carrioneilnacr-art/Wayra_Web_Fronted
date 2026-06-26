@@ -11,14 +11,14 @@ export const PanelDerechoReservas = ({
     return () => clearInterval(timer);
   }, []);
 
-  const obtenerEstadoSemaforo = (horaReserva, estadoActual) => {
+  const obtenerEstadoSemaforo = (horaReserva, estadoActual  ) => {
     if (estadoActual === 'confirmada') return { color: 'emerald', label: 'EN MESA', pulse: false };
     if (estadoActual === 'cancelada') return { color: 'slate', label: 'ANULADA', pulse: false };
     if (fechaSeleccionada !== hoyStr) return { color: 'slate', label: 'PROGRAMADA', pulse: false };
     
     const [horas, minutos] = horaReserva.split(':');
     const fechaRes = new Date();
-    fechaRes.setHours(parseInt(horas), parseInt(minutos), 0);
+    fechaRes.setHours(Number.parseInt(horas), Number.parseInt(minutos), 0);
     const diffMins = Math.floor((fechaRes - ahora) / 60000);
 
     if (diffMins < -10) return { color: 'rose', label: 'RETRASO CRÍTICO', pulse: true };
@@ -48,18 +48,25 @@ export const PanelDerechoReservas = ({
   return (
     <div className="w-full h-full flex flex-col bg-white">
       {/* BUSCADOR TÁCTIL */}
-      <div className="p-6 border-b border-slate-100 shrink-0">
-        <label className="text-[9px] font-black tracking-[0.3em] text-slate-400 block mb-3">Panel de control de acceso</label>
-        <div className="relative">
-          <input 
-            type="text" 
-            onChange={(e) => onSearch(e.target.value)}
-            placeholder="Buscar por DNI o Nombre de Cliente..." 
-            className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 pl-12 text-[11px] font-black tracking-tight focus:bg-white focus:border-slate-900 transition-all text-slate-800 placeholder-slate-300"
-          />
-          <span className="absolute left-4 top-4 opacity-30 text-xs">🔍</span>
+        <div className="p-6 border-b border-slate-100 shrink-0">
+          {/* ✅ Vinculado mediante htmlFor */}
+          <label 
+            htmlFor="input-busqueda" 
+            className="text-[9px] font-black tracking-[0.3em] text-slate-400 block mb-3"
+          >
+            Panel de control de acceso
+          </label>
+          <div className="relative">
+            <input 
+              id="input-busqueda" // ✅ Vinculado mediante id
+              type="text" 
+              onChange={(e) => onSearch(e.target.value)}
+              placeholder="Buscar por DNI o Nombre de Cliente..." 
+              className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 pl-12 text-[11px] font-black tracking-tight focus:bg-white focus:border-slate-900 transition-all text-slate-800 placeholder-slate-300"
+            />
+            <span className="absolute left-4 top-4 opacity-30 text-xs">🔍</span>
+          </div>
         </div>
-      </div>
 
       {/* LISTADO DE TICKETS DE RESERVA */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-50/50">
