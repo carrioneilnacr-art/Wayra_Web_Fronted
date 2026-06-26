@@ -15,6 +15,7 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+coverage
 
 # Editor (Configuraciones de tu VS Code)
 .vscode/

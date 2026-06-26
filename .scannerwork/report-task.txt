@@ -1,7 +1,0 @@
-organization=carrioneilnacr-art
-projectKey=carrioneilnacr-art_Wayra_Web_Fronted
-serverUrl=https://sonarcloud.io
-serverVersion=8.0.0.93576
-dashboardUrl=https://sonarcloud.io/dashboard?id=carrioneilnacr-art_Wayra_Web_Fronted
-ceTaskId=AZ8FCZ9-bX-7_bk83RJI
-ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZ8FCZ9-bX-7_bk83RJI
