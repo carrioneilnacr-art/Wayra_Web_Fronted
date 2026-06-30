@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer, Cell, AreaChart, Area 
+  Tooltip, ResponsiveContainer, AreaChart, Area 
 } from 'recharts';
 import wayraApi from '../../api/wayraApi'; 
 
@@ -34,6 +34,11 @@ export const ViewStats = () => {
 
   // Paleta de degradado sutil para las barras de platos más vendidos (Terracota a Índigo)
   const BAR_COLORS = ['#D35400', '#C0392B', '#A04000', '#2C3E50', '#1F497D'];
+
+  const topProductosConColores = data.topProductos?.map((p, index) => ({
+    ...p,
+    fill: BAR_COLORS[index % BAR_COLORS.length]
+  })) || [];
 
   return (
     <div className="animate-in fade-in duration-700 space-y-8 p-6 bg-[#F8F9FA] min-h-screen text-[#2C3E50]">
@@ -109,16 +114,12 @@ export const ViewStats = () => {
         <div className="col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
           <p className="text-[11px] font-black mb-6 tracking-widest uppercase text-[#7F8C8D]">Top Dishes</p>
           <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={data.topProductos} layout="vertical">
+            <BarChart data={topProductosConColores} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" horizontal={false} />
               <XAxis type="number" hide />
               <YAxis dataKey="nombre" type="category" stroke="#2C3E50" fontSize={10} width={95} />
               <Tooltip cursor={{fill: '#F8F9FA'}} contentStyle={{backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '11px'}} />
-              <Bar dataKey="cantidad" radius={[0, 6, 6, 0]} barSize={16}>
-                {data.topProductos.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
-                ))}
-              </Bar>
+              <Bar dataKey="cantidad" radius={[0, 6, 6, 0]} barSize={16} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -179,7 +180,7 @@ export const ViewStats = () => {
               </thead>
               <tbody className="text-xs text-[#2C3E50]">
                 {data.rendimientoMozos.map((mozo, idx) => (
-                  <tr key={idx} className="border-b border-slate-50 hover:bg-[#F8F9FA] transition-all">
+                  <tr key={`staff-${mozo.nombre}-${idx}`} className="border-b border-slate-50 hover:bg-[#F8F9FA] transition-all">
                     <td className="py-3.5 font-bold">{mozo.nombre}</td>
                     <td className="py-3.5 text-right font-black text-emerald-600">S/ {Number.parseFloat(mozo.total_vendido).toFixed(2)}</td>
                     <td className="py-3.5 pl-6">

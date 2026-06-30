@@ -64,6 +64,7 @@ export const ViewCarta = () => {
       await productoService.update(id, { estado: nuevoEstado });
       cargarCarta(); 
     } catch (e) { 
+      console.error("Error al actualizar el estado del producto:", e);
       alert("Error al actualizar el estado del producto."); 
     }
   };
@@ -79,7 +80,8 @@ export const ViewCarta = () => {
       });
       setModalEditar({ abierto: false, idProducto: null, nombre: "", precio: "", categoria: "Entradas", tiempo_estimado: "" });
       cargarCarta();
-    } catch (e) {
+    } catch (err) {
+      console.error("Error al actualizar los datos del plato:", err);
       alert("Error al actualizar los datos del plato.");
     }
   };
@@ -91,7 +93,8 @@ export const ViewCarta = () => {
       setMostrarForm(false);
       setNuevoProd({ nombre: '', precio: '', categoria: 'Entradas', tiempo_estimado: '' });
       cargarCarta();
-    } catch (e) { 
+    } catch (err) { 
+      console.error("Error al guardar el plato:", err);
       alert("Error al guardar el plato."); 
     }
   };
@@ -202,18 +205,18 @@ export const ViewCarta = () => {
             <h3 className="text-[#0a0913] font-black text-lg mb-5 tracking-tight uppercase">Nuevo Producto</h3>
             <div className="space-y-3.5">
               <div>
-                <label className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Nombre del Plato</label>
-                <input type="text" placeholder="INGRESE NOMBRE" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold uppercase text-[11px]" 
+                <label htmlFor="nuevo-nombre" className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Nombre del Plato</label>
+                <input id="nuevo-nombre" type="text" placeholder="INGRESE NOMBRE" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold uppercase text-[11px]" 
                   onChange={e => setNuevoProd({...nuevoProd, nombre: e.target.value.toUpperCase()})} required />
               </div>
               <div>
-                <label className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Precio de Venta</label>
-                <input type="number" step="0.01" placeholder="PRECIO" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" 
+                <label htmlFor="nuevo-precio" className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Precio de Venta</label>
+                <input id="nuevo-precio" type="number" step="0.01" placeholder="PRECIO" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" 
                   onChange={e => setNuevoProd({...nuevoProd, precio: e.target.value})} required />
               </div>
               <div>
-                <label className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Categoría de la Carta</label>
-                <select className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]"
+                <label htmlFor="nuevo-categoria" className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Categoría de la Carta</label>
+                <select id="nuevo-categoria" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]"
                   onChange={e => setNuevoProd({...nuevoProd, categoria: e.target.value})}>
                   <option value="Entradas">ENTRADAS</option>
                   <option value="Makis">MAKIS</option>
@@ -223,8 +226,8 @@ export const ViewCarta = () => {
                 </select>
               </div>
               <div>
-                <label className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Tiempo Estimado (Minutos)</label>
-                <input type="number" placeholder="TIEMPO" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" 
+                <label htmlFor="nuevo-tiempo" className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Tiempo Estimado (Minutos)</label>
+                <input id="nuevo-tiempo" type="number" placeholder="TIEMPO" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" 
                   onChange={e => setNuevoProd({...nuevoProd, tiempo_estimado: e.target.value})} required />
               </div>
             </div>
@@ -243,16 +246,16 @@ export const ViewCarta = () => {
             <h3 className="text-[#0a0913] font-black text-lg mb-5 tracking-tight uppercase">Editar Producto</h3>
             <div className="space-y-3.5">
               <div>
-                <label className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Modificar Nombre</label>
-                <input type="text" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold uppercase text-[11px]" value={modalEditar.nombre} onChange={e => setModalEditar({ ...modalEditar, nombre: e.target.value })} required />
+                <label htmlFor="editar-nombre" className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Modificar Nombre</label>
+                <input id="editar-nombre" type="text" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold uppercase text-[11px]" value={modalEditar.nombre} onChange={e => setModalEditar({ ...modalEditar, nombre: e.target.value })} required />
               </div>
               <div>
-                <label className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Modificar Precio (S/)</label>
-                <input type="number" step="0.01" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" value={modalEditar.precio} onChange={e => setModalEditar({ ...modalEditar, precio: e.target.value })} required />
+                <label htmlFor="editar-precio" className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Modificar Precio (S/)</label>
+                <input id="editar-precio" type="number" step="0.01" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" value={modalEditar.precio} onChange={e => setModalEditar({ ...modalEditar, precio: e.target.value })} required />
               </div>
               <div>
-                <label className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Modificar Categoría</label>
-                <select className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" value={modalEditar.categoria} onChange={e => setModalEditar({ ...modalEditar, categoria: e.target.value })}>
+                <label htmlFor="editar-categoria" className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Modificar Categoría</label>
+                <select id="editar-categoria" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" value={modalEditar.categoria} onChange={e => setModalEditar({ ...modalEditar, categoria: e.target.value })}>
                   <option value="Entradas">ENTRADAS</option>
                   <option value="Makis">MAKIS</option>
                   <option value="Fondos">PLATOS DE FONDO</option>
@@ -261,8 +264,8 @@ export const ViewCarta = () => {
                 </select>
               </div>
               <div>
-                <label className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Modificar Tiempo (Min)</label>
-                <input type="number" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" value={modalEditar.tiempo_estimado} onChange={e => setModalEditar({ ...modalEditar, tiempo_estimado: e.target.value })} required />
+                <label htmlFor="editar-tiempo" className="text-[9px] font-black text-[#7F8C8D] tracking-wider uppercase block mb-1.5">Modificar Tiempo (Min)</label>
+                <input id="editar-tiempo" type="number" className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-slate-100 outline-none focus:border-[#b07d62]/40 font-bold text-[11px]" value={modalEditar.tiempo_estimado} onChange={e => setModalEditar({ ...modalEditar, tiempo_estimado: e.target.value })} required />
               </div>
             </div>
             <div className="flex gap-3 mt-6">

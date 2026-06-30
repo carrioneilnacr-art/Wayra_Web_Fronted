@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { reservaService } from '../../services/reservaService';
 import { GridMesas } from '../../components/Recepcion/GridMesas';
 import { ReporteTurnos } from '../../components/Recepcion/ReporteTurnos';
@@ -50,6 +51,7 @@ export const ViewRecepcion = ({ onLogout, user }) => {
       setMostrarForm(false); setMesaSel(null); setReservaAEditar(null);
       cargarDatos();
     } catch (e) {
+      console.error("Error al procesar reserva:", e);
       alert("Error de red al procesar la reserva.");
     }
   };
@@ -75,6 +77,21 @@ export const ViewRecepcion = ({ onLogout, user }) => {
       user={user}
     />
   );
+
+  const mesasDelGrid = fechaSeleccionada === hoyStr ? mesas : mesas.map(m => ({...m, estado:'disponible'}));
+
+  const renderPopup = () => {
+    if (!mesaSel || mostrarForm) return null;
+    return (
+      <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[500] p-4">
+        <div className="bg-white p-8 md:p-12 rounded-[3rem] md:rounded-[4rem] shadow-2xl text-center w-full max-w-xs animate-in zoom-in duration-300">
+          <h2 className="text-4xl md:text-6xl font-black mb-4 italic text-slate-800 tracking-tighter underline decoration-blue-500 decoration-8">#{mesaSel.numero_mesa}</h2>
+          <button onClick={() => setMostrarForm(true)} className="w-full bg-slate-900 text-white py-4 md:py-6 rounded-3xl font-black text-xs shadow-2xl hover:bg-blue-600 transition-all italic tracking-widest">Confirmar Mesa</button>
+          <button onClick={() => setMesaSel(null)} className="mt-4 md:mt-6 text-slate-300 font-bold text-[9px] uppercase hover:text-rose-500 transition-all">Cancelar</button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <RecepcionLayout panelDerecho={renderPanelDerecho()}>
@@ -108,7 +125,7 @@ export const ViewRecepcion = ({ onLogout, user }) => {
           <button onClick={onLogout} className="group flex items-center gap-2 bg-white border border-slate-100 p-2 pr-4 rounded-2xl shadow-sm hover:bg-rose-50 transition-all duration-300">
             <div className="bg-rose-100 p-2 rounded-xl group-hover:bg-rose-500 transition-colors">
               <svg className="h-3 w-3 text-rose-600 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 16l4-4m0 0l-4-4m4 4H7" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 16l4-4m0 0l-4-4m4 4H7" />
               </svg>
             </div>
             <span className="text-[9px] font-black text-slate-400 group-hover:text-rose-600">SALIR</span>
@@ -123,7 +140,7 @@ export const ViewRecepcion = ({ onLogout, user }) => {
       <div className="flex-1 w-full bg-white rounded-[3.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] overflow-hidden border-8 border-white relative">
         {pestaña === 'hoy' ? (
           <GridMesas 
-            mesas={fechaSeleccionada !== hoyStr ? mesas.map(m => ({...m, estado:'disponible'})) : mesas} 
+            mesas={mesasDelGrid} 
             onMesaClick={setMesaSel} 
             mesaSeleccionada={mesaSel} 
           />
@@ -137,64 +154,82 @@ export const ViewRecepcion = ({ onLogout, user }) => {
                 </div>
                 <button onClick={() => setFechaNav(p => ({...p, mes: p.mes+1}))} className="p-3 md:p-4 bg-slate-50 rounded-full hover:bg-slate-100">❯</button>
              </div>
-            {[...Array(offset + diasMes)].map((_, i) => {
-              const d = i - offset + 1;
-              if (d <= 0) return <div key={i} />;
-              
-              const fStr = `${fechaNav.año}-${String(fechaNav.mes + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-              
-              const horaActual = new Date().getHours();
-              let fechaLimiteControl = hoyStr;
-              
-              if (horaActual >= 0 && horaActual < 5) {
-                const ayer = new Date();
-                ayer.setDate(ayer.getDate() - 1);
-                fechaLimiteControl = ayer.toLocaleDateString('en-CA');
+            {(() => {
+              const calendarDays = [];
+              for (let idx = 0; idx < offset; idx++) {
+                calendarDays.push({ id: `empty-${fechaNav.año}-${fechaNav.mes}-${idx}`, value: null });
               }
+              for (let d = 1; d <= diasMes; d++) {
+                const fStr = `${fechaNav.año}-${String(fechaNav.mes + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                calendarDays.push({ id: `day-${fStr}`, value: d, dateStr: fStr });
+              }
+              return calendarDays.map((day) => {
+                if (day.value === null) {
+                  return <div key={day.id} />;
+                }
 
-              const esPasado = fStr < fechaLimiteControl;
-              const tks = reservas.filter(r => r.fecha_reserva?.split('T')[0] === fStr && r.estado_reserva !== 'cancelada');
-              
-              return (
-                <div 
-                  key={i} 
-                  onClick={() => { if (esPasado) return; setFechaSeleccionada(fStr); setPestaña('hoy'); }}
-                  className={`h-20 md:h-24 border-2 rounded-[2rem] md:rounded-[2.5rem] p-3 md:p-4 flex flex-col justify-between transition-all ${
-                    esPasado 
-                      ? 'border-slate-100 bg-slate-100/50 text-slate-300 cursor-not-allowed pointer-events-none select-none' 
-                      : fStr === hoyStr 
-                        ? 'border-emerald-500 bg-emerald-50/30 shadow-md cursor-pointer hover:scale-105 text-slate-800' 
-                        : fStr === fechaSeleccionada 
-                          ? 'border-blue-600 bg-blue-50 cursor-pointer hover:scale-105 text-slate-800' 
-                          : 'border-slate-100 bg-white cursor-pointer hover:scale-105 text-slate-800' 
-                  }`}
-                >
-                  <span className={`font-black text-base md:text-xl ${esPasado ? 'text-slate-300' : 'text-slate-800'}`}>{d}</span>
-                  {tks.length > 0 && !esPasado && (
-                    <span className="bg-blue-600 text-white text-[7px] md:text-[8px] font-black px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg text-center truncate">
-                      {tks.length} TK
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+                const fStr = day.dateStr;
+                const d = day.value;
+                const horaActual = new Date().getHours();
+                let fechaLimiteControl = hoyStr;
+                
+                if (horaActual >= 0 && horaActual < 5) {
+                  const ayer = new Date();
+                  ayer.setDate(ayer.getDate() - 1);
+                  fechaLimiteControl = ayer.toLocaleDateString('en-CA');
+                }
+
+                const esPasado = fStr < fechaLimiteControl;
+                const tks = reservas.filter(r => r.fecha_reserva?.split('T')[0] === fStr && r.estado_reserva !== 'cancelada');
+                
+                let dayClassName = 'border-slate-100 bg-white cursor-pointer hover:scale-105 text-slate-800';
+                if (esPasado) {
+                  dayClassName = 'border-slate-100 bg-slate-100/50 text-slate-300 cursor-not-allowed pointer-events-none select-none';
+                } else if (fStr === hoyStr) {
+                  dayClassName = 'border-emerald-500 bg-emerald-50/30 shadow-md cursor-pointer hover:scale-105 text-slate-800';
+                } else if (fStr === fechaSeleccionada) {
+                  dayClassName = 'border-blue-600 bg-blue-50 cursor-pointer hover:scale-105 text-slate-800';
+                }
+
+                return (
+                  <button 
+                    key={day.id}
+                    type="button"
+                    onClick={() => {
+                      if (!esPasado) {
+                        setFechaSeleccionada(fStr);
+                        setPestaña('hoy');
+                      }
+                    }}
+                    disabled={esPasado}
+                    className={`h-20 md:h-24 border-2 rounded-[2rem] md:rounded-[2.5rem] p-3 md:p-4 flex flex-col justify-between transition-all text-left w-full ${dayClassName}`}
+                  >
+                    <span className={`font-black text-base md:text-xl ${esPasado ? 'text-slate-300' : 'text-slate-800'}`}>{d}</span>
+                    {tks.length > 0 && !esPasado && (
+                      <span className="bg-blue-600 text-white text-[7px] md:text-[8px] font-black px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg text-center truncate">
+                        {tks.length} TK
+                      </span>
+                    )}
+                  </button>
+                );
+              });
+            })()}
           </div>
         )}
       </div>
 
       {/* FORMULARIOS EMERGENTES */}
-      {mesaSel && !mostrarForm && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[500] p-4">
-          <div className="bg-white p-8 md:p-12 rounded-[3rem] md:rounded-[4rem] shadow-2xl text-center w-full max-w-xs animate-in zoom-in duration-300">
-            <h2 className="text-4xl md:text-6xl font-black mb-4 italic text-slate-800 tracking-tighter underline decoration-blue-500 decoration-8">#{mesaSel.numero_mesa}</h2>
-            <button onClick={() => setMostrarForm(true)} className="w-full bg-slate-900 text-white py-4 md:py-6 rounded-3xl font-black text-xs shadow-2xl hover:bg-blue-600 transition-all italic tracking-widest">Confirmar Mesa</button>
-            <button onClick={() => setMesaSel(null)} className="mt-4 md:mt-6 text-slate-300 font-bold text-[9px] uppercase hover:text-rose-500 transition-all">Cancelar</button>
-          </div>
-        </div>
-      )}
+      {renderPopup()}
 
       {mostrarForm && <ModalReserva mesa={mesaSel} reservaEdit={reservaAEditar} fechaSeleccionada={fechaSeleccionada} onClose={() => {setMostrarForm(false); setMesaSel(null); setReservaAEditar(null);}} onSave={handleGuardar} todasLasReservas={reservas} />}
       {ticketDetalle && <ModalDetalleTicket ticket={ticketDetalle} onClose={() => setTicketDetalle(null)} />}
     </RecepcionLayout>
   );
+};
+
+ViewRecepcion.propTypes = {
+  onLogout: PropTypes.func.isRequired,
+  user: PropTypes.shape({
+    id_usuario: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  }).isRequired,
 };

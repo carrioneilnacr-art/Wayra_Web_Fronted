@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export const TableResponsiva = ({ columnas = [], datos = [], renderFila }) => {
   if (!datos || datos.length === 0) {
@@ -17,8 +18,8 @@ export const TableResponsiva = ({ columnas = [], datos = [], renderFila }) => {
           <thead>
             <tr className="bg-slate-50/80 border-b border-slate-100">
               {columnas.map((col, index) => (
-                <th 
-                  key={index} 
+                <th
+                  key={`col-${col}-${index}`}
                   className="p-4 text-[9px] font-black text-slate-400 tracking-widest uppercase"
                 >
                   {col}
@@ -27,14 +28,23 @@ export const TableResponsiva = ({ columnas = [], datos = [], renderFila }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
-            {datos.map((item, index) => (
-              <tr key={index} className="hover:bg-slate-50/40 transition-colors">
-                {renderFila(item, index)}
-              </tr>
-            ))}
+            {datos.map((item, index) => {
+              const itemId = item.id || item.id_usuario || item.id_pedido || item.id_producto || item.id_reserva || index;
+              return (
+                <tr key={`row-${itemId}-${index}`} className="hover:bg-slate-50/40 transition-colors">
+                  {renderFila(item, index)}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
     </div>
   );
+};
+
+TableResponsiva.propTypes = {
+  columnas: PropTypes.arrayOf(PropTypes.string).isRequired,
+  datos: PropTypes.arrayOf(PropTypes.object).isRequired,
+  renderFila: PropTypes.func.isRequired,
 };

@@ -35,18 +35,18 @@ const ModalBoleta = ({ idPedido, onClose }) => {
   return (
     // ✅ overlay purificado: Soporta fondo blanco nativo al imprimir con 'print:bg-white print:backdrop-filter-none'
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-700/20 backdrop-blur-md print:bg-white print:backdrop-blur-none">
-      
+
       {/* ✅ ticketContainer purificado: fondo tradicional kintsugi #fcfaf7 sin shadow en impresión */}
       <div className="max-w-md w-full bg-[#fcfaf7] rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-slate-100 print:shadow-none print:border-none animate-in fade-in zoom-in-95 duration-500">
-        
+
         {/* Detalle Kintsugi (Clase global de tu index.css) */}
         <div className="kintsugi-accent !opacity-40 print:hidden"></div>
-        
+
         <div className="p-8 md:p-10">
           <header className="text-center mb-8">
             {/* ✅ hankoStatus purificado a Tailwind nativo */}
             <div className="border border-slate-900 text-slate-900 p-2 w-max mx-auto mb-4 text-[8px] font-black leading-none tracking-widest">
-              WAYRA<br/>NKK
+              WAYRA<br />NKK
             </div>
             <h1 className="text-2xl font-extralight tracking-[0.4em] uppercase gold-shimmer italic">Comprobante</h1>
             <div className="h-[1px] w-12 bg-[#c5a059] mx-auto mt-2 opacity-50"></div>
@@ -83,7 +83,7 @@ const ModalBoleta = ({ idPedido, onClose }) => {
             </thead>
             <tbody className="text-[10px] tracking-widest text-slate-700">
               {data.items?.map((item, index) => (
-                <tr key={index} className="border-b border-slate-100/60">
+                <tr key={`boleta-item-${item.producto}-${index}`} className="border-b border-slate-100/60">
                   <td className="py-3.5 font-bold text-[#b07d62]">{item.cantidad}</td>
                   <td className="py-3.5 font-medium uppercase truncate max-w-[180px]">{item.producto}</td>
                   <td className="py-3.5 text-right font-bold font-mono text-slate-800">S/ {Number.parseFloat(item.subtotal).toFixed(2)}</td>
@@ -101,21 +101,21 @@ const ModalBoleta = ({ idPedido, onClose }) => {
           </div>
 
           <footer className="text-center opacity-50 text-[7px] tracking-[0.3em] uppercase leading-loose text-slate-400">
-            Gracias por compartir la experiencia<br/>
-            Wayra Nikkei · Lima — Tokyo<br/>
+            Gracias por compartir la experiencia<br />
+            Wayra Nikkei · Lima — Tokyo<br />
             <span className="text-[#c5a059] font-bold">Patrimonio & Tradición</span>
           </footer>
         </div>
 
         {/* ACCIONES - Ocultas nativamente en impresión con 'print:hidden' */}
         <div className="flex border-t border-slate-100 print:hidden shrink-0">
-          <button 
-            onClick={() => window.print()}
+          <button
+            onClick={() => globalThis.print()}
             className="flex-1 py-4.5 bg-slate-50 text-slate-700 text-[9px] tracking-[0.3em] uppercase font-black hover:bg-[#b07d62] hover:text-white transition-all duration-300 border-r border-slate-100 flex items-center justify-center gap-1"
           >
             🖨️ Imprimir
           </button>
-          <button 
+          <button
             onClick={onClose}
             className="flex-1 py-4.5 bg-slate-50 text-rose-600 text-[9px] tracking-[0.3em] uppercase font-black hover:bg-rose-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-1"
           >

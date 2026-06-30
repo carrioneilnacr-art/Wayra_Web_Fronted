@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export const CardProducto = ({ producto, onAction, actionLabel = "+", showStock = true }) => {
   const { nombre, precio, categoria, estado } = producto;
@@ -17,8 +18,8 @@ export const CardProducto = ({ producto, onAction, actionLabel = "+", showStock 
       </div>
 
       {onAction && esDisponible && (
-        <button 
-          on  Click={() => onAction(producto)}
+        <button
+          onClick={() => onAction(producto)}
           className="bg-slate-900 text-white font-sans font-black text-sm w-10 h-10 rounded-xl flex items-center justify-center hover:bg-blue-600 transition-all shadow-sm active:scale-95 shrink-0"
         >
           {actionLabel}
@@ -32,4 +33,16 @@ export const CardProducto = ({ producto, onAction, actionLabel = "+", showStock 
       )}
     </div>
   );
+};
+
+CardProducto.propTypes = {
+  producto: PropTypes.shape({
+    nombre: PropTypes.string.isRequired,
+    precio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    categoria: PropTypes.string.isRequired,
+    estado: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  }).isRequired,
+  onAction: PropTypes.func,
+  actionLabel: PropTypes.string,
+  showStock: PropTypes.bool,
 };

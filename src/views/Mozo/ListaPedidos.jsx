@@ -1,10 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { pedidoService } from '../../services/pedidoService';
 
 const ListaPedidos = ({ pedidos = [], onUpdate }) => {
   
   const handlePagar = async (idPedido) => {
-    if (!window.confirm("¿Confirmas el cobro de esta mesa?")) return;
+    if (!globalThis.confirm("¿Confirmas el cobro de esta mesa?")) return;
     try {
       // ✅ ARQUITECTURA SENIOR: Llamada a través de la capa de infraestructura aislada
       const res = await pedidoService.pagarPedido(idPedido);
@@ -70,6 +71,18 @@ const ListaPedidos = ({ pedidos = [], onUpdate }) => {
       })}
     </div>
   );
+};
+
+ListaPedidos.propTypes = {
+  pedidos: PropTypes.arrayOf(
+    PropTypes.shape({
+      id_pedido: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      id_mesa: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      estado_pedido: PropTypes.string.isRequired,
+      total: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    })
+  ),
+  onUpdate: PropTypes.func.isRequired,
 };
 
 export default ListaPedidos;

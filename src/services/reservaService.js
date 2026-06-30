@@ -25,7 +25,7 @@ export const reservaService = {
   // Guardar o actualizar una admisión/reserva con la huella digital del usuario
   saveReserva: async (form, idReserva = null, idUsuario = null) => {
     const datosConIdentidad = { ...form, id_usuario: idUsuario };
-    
+
     if (idReserva) {
       const res = await wayraApi.put(`/reservas/${idReserva}`, datosConIdentidad);
       return res.data;
@@ -34,5 +34,5 @@ export const reservaService = {
       return res.data;
     }
   }
-  
+
 };

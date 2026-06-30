@@ -29,3 +29,7 @@ coverage
 # Archivos de Sistema
 DS_Store
 Thumbs.db
+
+# Herramientas de Análisis y Temporales
+.scannerwork/
+html/

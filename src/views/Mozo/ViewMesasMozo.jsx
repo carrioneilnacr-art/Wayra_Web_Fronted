@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { reservaService } from '../../services/reservaService';
 import { pedidoService } from '../../services/pedidoService';
 import { productoService } from '../../services/productoService';
@@ -65,9 +66,12 @@ export const ViewMesasMozo = ({ onLogout, user }) => {
     return pedidos.find(p => p.id_mesa === mesaSel.id_mesa && p.estado_pedido !== 'PAGADO');
   };
 
-  const colorCapacidad = 
-    misMesasOcupadasCount <= 2 ? 'bg-emerald-500' : 
-    misMesasOcupadasCount === 3 ? 'bg-amber-400' : 'bg-rose-500';
+  let colorCapacidad = 'bg-rose-500';
+  if (misMesasOcupadasCount <= 2) {
+    colorCapacidad = 'bg-emerald-500';
+  } else if (misMesasOcupadasCount === 3) {
+    colorCapacidad = 'bg-amber-400';
+  }
 
   const renderPanelIzquierdo = () => (
     <div className="relative w-full min-h-full flex flex-col">
@@ -170,4 +174,12 @@ export const ViewMesasMozo = ({ onLogout, user }) => {
       )}
     </MozoLayout>
   );
+};
+
+ViewMesasMozo.propTypes = {
+  onLogout: PropTypes.func.isRequired,
+  user: PropTypes.shape({
+    id_usuario: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    nombre: PropTypes.string,
+  }).isRequired,
 };

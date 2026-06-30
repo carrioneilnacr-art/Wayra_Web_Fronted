@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export const ScrollCategorias = ({ categorias = [], categoriaActiva, onSelect }) => {
   return (
@@ -10,8 +11,8 @@ export const ScrollCategorias = ({ categorias = [], categoriaActiva, onSelect })
             key={cat}
             onClick={() => onSelect(cat)}
             className={`px-5 py-2.5 rounded-xl text-[9px] font-black tracking-widest transition-all border uppercase whitespace-nowrap
-              ${esActivo 
-                ? 'bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-900/10' 
+              ${esActivo
+                ? 'bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-900/10'
                 : 'bg-white border-slate-100 text-slate-400 hover:border-slate-300'}`}
           >
             {cat}
@@ -20,4 +21,10 @@ export const ScrollCategorias = ({ categorias = [], categoriaActiva, onSelect })
       })}
     </div>
   );
+};
+
+ScrollCategorias.propTypes = {
+  categorias: PropTypes.arrayOf(PropTypes.string).isRequired,
+  categoriaActiva: PropTypes.string,
+  onSelect: PropTypes.func.isRequired,
 };

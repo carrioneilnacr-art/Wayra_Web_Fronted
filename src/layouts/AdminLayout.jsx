@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { ejecutarCierreSesionGlobal } from '../helpers/logoutHelper';
 
 export const AdminLayout = ({ children, seccion, setSeccion, user, onLogout }) => {
@@ -6,9 +7,9 @@ export const AdminLayout = ({ children, seccion, setSeccion, user, onLogout }) =
 
   return (
     <div className="flex h-screen bg-[#f4f1ea] font-['Montserrat'] overflow-hidden relative">
-      
+
       {/* 📱 BOTÓN HAMBURGUESA FLOTANTE */}
-      <button 
+      <button
         onClick={() => setMenuAbierto(!menuAbierto)}
         className="md:hidden fixed top-6 left-6 z-40 bg-[#0a0913] text-white p-3 rounded-2xl shadow-xl border border-white/10 transition-all active:scale-95"
       >
@@ -27,7 +28,7 @@ export const AdminLayout = ({ children, seccion, setSeccion, user, onLogout }) =
         md:relative md:translate-x-0 md:w-64
         ${menuAbierto ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        
+
         {/* 🍣 BRANDING ESTÉTICO */}
         <div className="mb-14 pt-4 flex flex-col items-start pl-4">
           <div className="flex items-center gap-3.5">
@@ -39,15 +40,14 @@ export const AdminLayout = ({ children, seccion, setSeccion, user, onLogout }) =
               </svg>
             </div>
             <div className="text-white font-light tracking-[0.2em] text-xs font-sans uppercase">
-              WAYRA
-              <span className="block font-black tracking-[0.35em] text-[9px] text-[#b07d62] mt-0.5">NIKKEI</span>
+              WAYRA <span className="block font-black tracking-[0.35em] text-[9px] text-[#b07d62] mt-0.5">NIKKEI</span>
             </div>
           </div>
           <p className="text-[8px] tracking-[0.3em] text-slate-500 font-bold uppercase mt-4 pl-0.5">
             ROL: {user?.rol || 'ADMIN'}
           </p>
         </div>
-        
+
         {/* NAVEGACIÓN CON ICONS LINEALES */}
         <nav className="flex-1 space-y-1.5">
           {[
@@ -56,12 +56,12 @@ export const AdminLayout = ({ children, seccion, setSeccion, user, onLogout }) =
             { id: 'usuarios', label: 'Usuarios', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg> },
             { id: 'historial', label: 'Historial', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> }
           ].map(item => (
-            <button 
+            <button
               key={item.id}
               onClick={() => { setSeccion(item.id); setMenuAbierto(false); }}
               className={`w-full flex items-center gap-4 py-3 px-4 rounded-full transition-all duration-300 text-[10px] tracking-[0.2em] uppercase
-                ${seccion === item.id 
-                  ? 'bg-[#b07d62]/15 text-[#e0a885] font-bold shadow-[inset_0_1px_2px_rgba(255,255,255,0.02)]' 
+                ${seccion === item.id
+                  ? 'bg-[#b07d62]/15 text-[#e0a885] font-bold shadow-[inset_0_1px_2px_rgba(255,255,255,0.02)]'
                   : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
             >
               <div className={`transition-transform duration-300 ${seccion === item.id ? 'scale-105 text-[#e0a885]' : 'text-slate-400'}`}>
@@ -73,8 +73,8 @@ export const AdminLayout = ({ children, seccion, setSeccion, user, onLogout }) =
         </nav>
 
         {/* 🚪 BOTÓN DE CIERRE DE SESIÓN */}
-        <button 
-          onClick={() => ejecutarCierreSesionGlobal(user, onLogout)} 
+        <button
+          onClick={() => ejecutarCierreSesionGlobal(user, onLogout)}
           className="mt-auto pt-4 border-t border-white/5 flex items-center gap-4 text-slate-500 hover:text-[#d9534f] text-[9px] tracking-[0.2em] uppercase transition-all font-medium px-4 text-left group"
         >
           <svg className="w-4 h-4 transition-colors group-hover:text-[#d9534f]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
@@ -86,7 +86,12 @@ export const AdminLayout = ({ children, seccion, setSeccion, user, onLogout }) =
 
       {/* 🌟 BLUR OVERLAY */}
       {menuAbierto && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-10 md:hidden" onClick={() => setMenuAbierto(false)} />
+        <button
+          type="button"
+          aria-label="Cerrar menú"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-10 md:hidden cursor-default outline-none"
+          onClick={() => setMenuAbierto(false)}
+        />
       )}
 
       {/* 🍽️ ÁREA DE CONTENIDO DINÁMICO */}
@@ -98,4 +103,14 @@ export const AdminLayout = ({ children, seccion, setSeccion, user, onLogout }) =
 
     </div>
   );
+};
+
+AdminLayout.propTypes = {
+  children: PropTypes.node.isRequired,
+  seccion: PropTypes.string.isRequired,
+  setSeccion: PropTypes.func.isRequired,
+  user: PropTypes.shape({
+    rol: PropTypes.string,
+  }),
+  onLogout: PropTypes.func.isRequired,
 };

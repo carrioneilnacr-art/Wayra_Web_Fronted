@@ -33,7 +33,8 @@ export const ViewUsuarios = () => {
       setMostrarForm(false);
       setNuevoUsuario({ nombre: '', usuario: '', password: '', rol: 'mozo' });
       cargarUsuarios();
-    } catch (e) { 
+    } catch (err) { 
+      console.error("Error al registrar personal:", err);
       alert("Error al registrar: Revisa si el usuario ya existe."); 
     }
   };
@@ -45,18 +46,20 @@ export const ViewUsuarios = () => {
       await authService.updateUsuario(usuarioEditar.id_usuario, usuarioEditar);
       setUsuarioEditar(null);
       cargarUsuarios();
-    } catch (e) { 
+    } catch (err) { 
+      console.error("Error al actualizar el perfil:", err);
       alert("Error al actualizar el perfil."); 
     }
   };
 
   // 4. ELIMINAR
   const eliminarUsuario = async (id) => {
-    if(!window.confirm("¿ELIMINAR ACCESO DEFINITIVAMENTE?")) return;
+    if(!globalThis.confirm("¿ELIMINAR ACCESO DEFINITIVAMENTE?")) return;
     try {
       await authService.deleteUsuario(id);
       cargarUsuarios();
-    } catch (e) {
+    } catch (err) {
+      console.error("Error al eliminar usuario:", err);
       alert("Error al eliminar usuario.");
     }
   };
@@ -108,6 +111,13 @@ export const ViewUsuarios = () => {
           const estado = u.estado_sesion || 'offline';
           const rolUser = u.rol ? u.rol.toLowerCase() : 'mozo';
           
+          let statusDotBgClass = 'bg-slate-300';
+          if (estado === 'activo') {
+            statusDotBgClass = 'bg-emerald-500';
+          } else if (estado === 'break') {
+            statusDotBgClass = 'bg-amber-500';
+          }
+
           return (
             <div key={u.id_usuario} className="bg-white rounded-3xl border border-slate-100 p-5 flex flex-col justify-between shadow-[0_4px_16px_rgba(0,0,0,0.01)] relative overflow-hidden transition-all hover:border-slate-200/80">
               
@@ -135,9 +145,7 @@ export const ViewUsuarios = () => {
               <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
                 <div className="w-12 h-12 rounded-full bg-[#f4f1ea] flex items-center justify-center relative shadow-inner shrink-0">
                   {renderizarIconoRol(u.rol)}
-                  <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm
-                    ${estado === 'activo' ? 'bg-emerald-500' : estado === 'break' ? 'bg-amber-500' : 'bg-slate-300'}`}
-                  />
+                  <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm ${statusDotBgClass}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[#2C3E50] font-black text-xs uppercase tracking-wider truncate pr-14">{u.nombre}</p>
@@ -225,20 +233,20 @@ export const ViewUsuarios = () => {
             <h3 className="text-[#0a0913] font-black text-lg mb-5 tracking-tight uppercase">Editar Perfil</h3>
             <div className="space-y-3.5">
               <div>
-                <label className="text-[9px] font-black text-[#7F8C8D] uppercase block mb-1.5 tracking-wider">Nombre</label>
-                <input type="text" value={usuarioEditar.nombre} className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] outline-none font-bold uppercase text-[11px] focus:bg-white border border-transparent focus:border-[#b07d62]/30 transition-all" onChange={e => setUsuarioEditar({...usuarioEditar, nombre: e.target.value.toUpperCase()})} />
+                <label htmlFor="editar-staff-nombre" className="text-[9px] font-black text-[#7F8C8D] uppercase block mb-1.5 tracking-wider">Nombre</label>
+                <input id="editar-staff-nombre" type="text" value={usuarioEditar.nombre} className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] outline-none font-bold uppercase text-[11px] focus:bg-white border border-transparent focus:border-[#b07d62]/30 transition-all" onChange={e => setUsuarioEditar({...usuarioEditar, nombre: e.target.value.toUpperCase()})} />
               </div>
               <div>
-                <label className="text-[9px] font-black text-[#7F8C8D] uppercase block mb-1.5 tracking-wider">Usuario</label>
-                <input type="text" value={usuarioEditar.usuario} className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] outline-none font-bold text-[11px] focus:bg-white border border-transparent focus:border-[#b07d62]/30 transition-all" onChange={e => setUsuarioEditar({...usuarioEditar, usuario: e.target.value})} />
+                <label htmlFor="editar-staff-usuario" className="text-[9px] font-black text-[#7F8C8D] uppercase block mb-1.5 tracking-wider">Usuario</label>
+                <input id="editar-staff-usuario" type="text" value={usuarioEditar.usuario} className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] outline-none font-bold text-[11px] focus:bg-white border border-transparent focus:border-[#b07d62]/30 transition-all" onChange={e => setUsuarioEditar({...usuarioEditar, usuario: e.target.value})} />
               </div>
               <div>
-                <label className="text-[9px] font-black text-[#7F8C8D] uppercase block mb-1.5 tracking-wider">Nueva Contraseña (Opcional)</label>
-                <input type="password" placeholder="DEJAR EN BLANCO PARA NO CAMBIAR" value={usuarioEditar.password || ''} className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-dashed border-slate-200 outline-none font-bold text-[11px] focus:bg-white focus:border-solid focus:border-[#b07d62]/30 transition-all" onChange={e => setUsuarioEditar({...usuarioEditar, password: e.target.value})} />
+                <label htmlFor="editar-staff-password" className="text-[9px] font-black text-[#7F8C8D] uppercase block mb-1.5 tracking-wider">Nueva Contraseña (Opcional)</label>
+                <input id="editar-staff-password" type="password" placeholder="DEJAR EN BLANCO PARA NO CAMBIAR" value={usuarioEditar.password || ''} className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] border border-dashed border-slate-200 outline-none font-bold text-[11px] focus:bg-white focus:border-solid focus:border-[#b07d62]/30 transition-all" onChange={e => setUsuarioEditar({...usuarioEditar, password: e.target.value})} />
               </div>
               <div>
-                <label className="text-[9px] font-black text-[#7F8C8D] uppercase block mb-1.5 tracking-wider">Rol</label>
-                <select value={usuarioEditar.rol} className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] outline-none font-bold text-[11px] focus:bg-white border border-transparent focus:border-[#b07d62]/30 transition-all" onChange={e => setUsuarioEditar({...usuarioEditar, rol: e.target.value})}>
+                <label htmlFor="editar-staff-rol" className="text-[9px] font-black text-[#7F8C8D] uppercase block mb-1.5 tracking-wider">Rol</label>
+                <select id="editar-staff-rol" value={usuarioEditar.rol} className="w-full bg-slate-50 p-3.5 rounded-xl text-[#2C3E50] outline-none font-bold text-[11px] focus:bg-white border border-transparent focus:border-[#b07d62]/30 transition-all" onChange={e => setUsuarioEditar({...usuarioEditar, rol: e.target.value})}>
                   <option value="mozo">MOZO</option>
                   <option value="recepcionista">RECEPCIONISTA</option>
                   <option value="admin">ADMIN</option>

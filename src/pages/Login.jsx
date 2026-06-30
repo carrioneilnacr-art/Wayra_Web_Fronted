@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import PropTypes from "prop-types";
+import wayraApi from "../api/wayraApi";
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({ user: "", pass: "" });
@@ -8,18 +10,18 @@ const Login = ({ onLogin }) => {
 
   const getSecureRandom = () => {
     const array = new Uint32Array(1);
-    window.crypto.getRandomValues(array);
+    globalThis.crypto.getRandomValues(array);
     return array[0] / (0xFFFFFFFF + 1);
   };
   // 1. Lógica para el efecto Tilt 3D
   useEffect(() => {
     const handleMouseMove = (e) => {
-      if (!cardRef.current || window.innerWidth < 768) return;
-      const x = e.clientX / window.innerWidth - 0.5;
-      const y = e.clientY / window.innerHeight - 0.5;
+      if (!cardRef.current || globalThis.innerWidth < 768) return;
+      const x = e.clientX / globalThis.innerWidth - 0.5;
+      const y = e.clientY / globalThis.innerHeight - 0.5;
       cardRef.current.style.transform = `rotateY(${x * 8}deg) rotateX(${y * -8}deg)`;
     };
-    const handleMouseLeave = () => {    
+    const handleMouseLeave = () => {
       if (cardRef.current) cardRef.current.style.transform = `rotateY(0deg) rotateX(0deg)`;
     };
     document.addEventListener("mousemove", handleMouseMove);
@@ -36,7 +38,7 @@ const Login = ({ onLogin }) => {
     const container = document.getElementById("dust-container");
     if (!container) return;
 
-   for (let i = 0; i < particleCount; i++) {
+    for (let i = 0; i < particleCount; i++) {
       let dust = document.createElement('div');
       dust.className = 'flavor-dust';
       // Usamos getSecureRandom() en lugar de Math.random()
@@ -50,38 +52,39 @@ const Login = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const data = await response.json();
+      const response = await wayraApi.post('/login', formData);
+      const data = response.data;
       if (data.success) {
-        onLogin(data.usuario);
+        onLogin(data.usuario, data.token);
       } else {
         setError(data.message || "Credenciales incorrectas");
       }
     } catch (err) {
-      setError("Error: El servidor no responde");
+      // Si el servidor responde con un error de Axios (ej. 401)
+      if (err.response?.data) {
+        setError(err.response.data.message || "Credenciales incorrectas");
+      } else {
+        setError("Error: El servidor no responde");
+      }
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[#f7f5f2] perspective-1000 overflow-hidden relative">
-      
+
       {/* --- SISTEMA DE FONDO GPU ACCELERATED --- */}
       <div className="background-texture fixed inset-0 pointer-events-none z-0"></div>
       <div className="nazca-spirit fixed inset-0 pointer-events-none z-0"></div>
-      
+
       <svg className="kintsugi-vessels fixed inset-0 pointer-events-none z-0" width="100%" height="100%" preserveAspectRatio="none">
         <path className="gold-vessel" d="M-100,400 Q200,300 400,500 T800,300 T1200,500" />
         <path className="gold-vessel" d="M1100,600 Q800,700 500,500 T-100,700" style={{ animationDelay: '10s' }} />
       </svg>
-      
+
       <div id="dust-container" className="fixed inset-0 pointer-events-none z-0"></div>
       {/* ---------------------------------------- */}
 
-      <div 
+      <div
         ref={cardRef}
         className="main-card w-full max-w-[450px] md:max-w-lg rounded-[4px] p-10 md:p-20 relative z-10 transition-transform duration-200 ease-out transform-gpu shadow-2xl scale-95 md:scale-100"
         style={{ transformStyle: "preserve-3d", backgroundColor: "rgba(255, 255, 255, 0.45)", backdropFilter: "blur(40px)" }}
@@ -90,8 +93,8 @@ const Login = ({ onLogin }) => {
 
         <div className="flex justify-center mb-8">
           <svg width="80" height="80" viewBox="0 0 100 100" className="drop-shadow-sm hover:scale-110 transition-transform duration-500">
-            <path d="M80 50 C 80 25, 55 20, 40 25 C 20 35, 20 70, 45 80 C 70 90, 85 75, 80 45" 
-                  fill="none" stroke="#c5a059" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M80 50 C 80 25, 55 20, 40 25 C 20 35, 20 70, 45 80 C 70 90, 85 75, 80 45"
+              fill="none" stroke="#c5a059" strokeWidth="1.5" strokeLinecap="round" />
             <circle cx="50" cy="50" r="4" fill="#121212" />
           </svg>
         </div>
@@ -104,23 +107,23 @@ const Login = ({ onLogin }) => {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="input-wrapper group">
-            <input 
-              type="text" 
+            <input
+              type="text"
               className="input-elegant w-full py-4 text-[11px] tracking-widest uppercase placeholder:text-gray-400 bg-transparent outline-none focus:pl-2 transition-all text-slate-800"
               placeholder="USUARIO"
-              onChange={(e) => setFormData({...formData, user: e.target.value})} 
-              required 
+              onChange={(e) => setFormData({ ...formData, user: e.target.value })}
+              required
             />
             <div className="focus-line"></div>
           </div>
 
           <div className="input-wrapper group">
-            <input 
-              type="password" 
+            <input
+              type="password"
               className="input-elegant w-full py-4 text-[11px] tracking-widest uppercase placeholder:text-gray-400 bg-transparent outline-none focus:pl-2 transition-all text-slate-800"
               placeholder="CONTRASEÑA"
-              onChange={(e) => setFormData({...formData, pass: e.target.value})} 
-              required 
+              onChange={(e) => setFormData({ ...formData, pass: e.target.value })}
+              required
             />
             <div className="focus-line"></div>
           </div>
@@ -145,6 +148,10 @@ const Login = ({ onLogin }) => {
       </div>
     </div>
   );
+};
+
+Login.propTypes = {
+  onLogin: PropTypes.func.isRequired,
 };
 
 export default Login;

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
+import PropTypes from 'prop-types';
 import { pedidoService } from '../../services/pedidoService';
 // Ya no necesitamos importar ComanderoCarta aquí, porque se renderizará en ViewMesasMozo
 
@@ -34,7 +33,7 @@ export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTic
   }, [pedidoSel]);
 
   const eliminarPlato = async (idDetalle) => {
-    if (!window.confirm("¿Eliminar este plato del pedido?")) return;
+    if (!globalThis.confirm("¿Eliminar este plato del pedido?")) return;
     try {
       await pedidoService.eliminarItemDetalle(idDetalle);
       onUpdate(); 
@@ -76,11 +75,15 @@ export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTic
           const algunListo = p.items?.some(i => minutos >= (i.tiempo_estimado || 15));
 
           return (
-            <div key={p.id_pedido} onClick={() => setPedidoSel(p)} 
-              className={`group bg-white rounded-xl p-5 cursor-pointer transition-all border shadow-sm hover:shadow-md flex flex-col justify-between h-40
-                ${algunListo ? 'border-teal-200 ring-1 ring-teal-50' : 'border-slate-200'}`}>
+            <button 
+              key={p.id_pedido} 
+              type="button"
+              onClick={() => setPedidoSel(p)} 
+              className={`group bg-white rounded-xl p-5 cursor-pointer transition-all border shadow-sm hover:shadow-md flex flex-col justify-between h-40 w-full text-left
+                ${algunListo ? 'border-teal-200 ring-1 ring-teal-50' : 'border-slate-200'}`}
+            >
               
-              <div className="flex justify-between items-start mb-2">
+              <div className="flex justify-between items-start mb-2 w-full">
                 <div>
                   <p className="text-xs text-slate-500 font-medium mb-1">Orden #{p.id_pedido}</p>
                   <span className="text-2xl font-bold text-slate-900 tracking-tight">Mesa {p.id_mesa}</span>
@@ -90,7 +93,7 @@ export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTic
                   : <span className="text-[10px] font-medium px-2.5 py-1 rounded-md bg-slate-100 text-slate-600">{minutos} min</span>}
               </div>
 
-              <div className="mt-auto">
+              <div className="mt-auto w-full">
                 <div className="flex justify-between items-end mb-2">
                   <p className="text-sm text-slate-500">{p.items?.length || 0} items</p>
                   <p className="text-lg font-semibold text-slate-900">S/ {Number.parseFloat(p.total).toFixed(2)}</p>
@@ -99,7 +102,7 @@ export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTic
                   <div className={`h-full transition-all duration-1000 ${progreso > 75 ? 'bg-orange-400' : 'bg-teal-500'}`} style={{ width: `${progreso}%` }}></div>
                 </div>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -125,7 +128,7 @@ export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTic
                   const transcurrido = Math.floor((ahora - new Date(pedidoSel.fecha_pedido)) / 60000);
                   const listo = transcurrido >= (item.tiempo_estimado || 15);
                   return (
-                    <div key={item.id_detalle} className={`group flex justify-between items-start p-3 ${index !== pedidoSel.items.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                    <div key={item.id_detalle} className={`group flex justify-between items-start p-3 ${index === pedidoSel.items.length - 1 ? '' : 'border-b border-slate-100'}`}>
                       <div className="flex items-start gap-3">
                         <span className="text-sm font-semibold text-slate-400 bg-slate-50 px-2 py-0.5 rounded">{item.cantidad}</span>
                         <div>
@@ -163,6 +166,34 @@ export const MonitorPedidos = ({ pedidos = [], onUpdate, userLogueado, onShowTic
       )}
     </div>
   );
+};
+
+MonitorPedidos.propTypes = {
+  pedidos: PropTypes.arrayOf(
+    PropTypes.shape({
+      id_pedido: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      id_mozo: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      id_mesa: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      estado_pedido: PropTypes.string.isRequired,
+      fecha_pedido: PropTypes.string.isRequired,
+      total: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      observacion: PropTypes.string,
+      items: PropTypes.arrayOf(
+        PropTypes.shape({
+          id_detalle: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+          cantidad: PropTypes.number.isRequired,
+          nombre: PropTypes.string.isRequired,
+          tiempo_estimado: PropTypes.number,
+        })
+      ),
+    })
+  ),
+  onUpdate: PropTypes.func.isRequired,
+  userLogueado: PropTypes.shape({
+    id_usuario: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  }).isRequired,
+  onShowTicket: PropTypes.func.isRequired,
+  onAgregarPlatos: PropTypes.func.isRequired,
 };
 
 export default MonitorPedidos;

@@ -1,7 +1,7 @@
 import wayraApi from '../api/wayraApi';
 
 export const authService = {
-  // 1. Listar todo el personal del restaurante
+  // 1. Listar al personal del restaurante
   getUsuarios: async () => {
     const res = await wayraApi.get('/admin/usuarios');
     return res.data;

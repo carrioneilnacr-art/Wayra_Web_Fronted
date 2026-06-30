@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { pedidoService } from '../../services/pedidoService';
 
 export const ComanderoCarta = ({ mesa, onClose, onSuccess, pedidoExistente, userLogueado, productosCache }) => {
@@ -79,6 +80,13 @@ export const ComanderoCarta = ({ mesa, onClose, onSuccess, pedidoExistente, user
     }
   };
 
+  let submitButtonText = 'ENVIAR A COCINA';
+  if (enviando) {
+    submitButtonText = 'PROCESANDO...';
+  } else if (pedidoExistente) {
+    submitButtonText = 'ACTUALIZAR COMANDA';
+  }
+
   return (
     <div className="flex flex-col h-full bg-slate-50 font-sans text-slate-800 rounded-3xl overflow-hidden">
       
@@ -116,16 +124,21 @@ export const ComanderoCarta = ({ mesa, onClose, onSuccess, pedidoExistente, user
           <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {productos.filter(p => p.categoria?.toUpperCase() === cat.toUpperCase() && Number.parseInt(p.estado) === 1).map(p => (
-                <div key={p.id_producto} className="bg-white p-5 rounded-2xl border border-slate-200 flex justify-between items-center shadow-sm hover:shadow-md hover:border-teal-200 transition-all cursor-pointer min-h-[80px]" onClick={() => agregar(p)}>
+                <button 
+                  key={p.id_producto} 
+                  type="button"
+                  className="bg-white p-5 rounded-2xl border border-slate-200 flex justify-between items-center shadow-sm hover:shadow-md hover:border-teal-200 transition-all cursor-pointer min-h-[80px] text-left w-full" 
+                  onClick={() => agregar(p)}
+                >
                   <div className="min-w-0 pr-3 w-full">
                     {/* 2. Solución visual: line-clamp-2 reemplaza a truncate para permitir múltiples líneas */}
                     <p className="font-semibold text-slate-900 text-sm leading-tight line-clamp-2 mb-1.5">{p.nombre}</p>
                     <p className="text-slate-500 font-medium text-sm">S/ {Number.parseFloat(p.precio).toFixed(2)}</p>
                   </div>
-                  <button className="bg-slate-50 text-slate-600 border border-slate-200 w-10 h-10 rounded-xl font-medium text-xl flex items-center justify-center shrink-0 transition-colors pointer-events-none">
+                  <div className="bg-slate-50 text-slate-600 border border-slate-200 w-10 h-10 rounded-xl font-medium text-xl flex items-center justify-center shrink-0 transition-colors pointer-events-none">
                     +
-                  </button>
-                </div>
+                  </div>
+                </button>
               ))}
             </div>
           </div>
@@ -162,9 +175,9 @@ export const ComanderoCarta = ({ mesa, onClose, onSuccess, pedidoExistente, user
           </div>
 
           <div className="p-6 border-t border-slate-200 bg-slate-50 shrink-0">
-             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">
+             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">
                 {pedidoExistente ? "Editar Nota a Cocina:" : "Nota a Cocina:"}
-             </label>
+             </span>
              <textarea 
                 placeholder="Ej. Sin picante, bien cocido..."
                 className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm text-slate-800 placeholder-slate-400 mb-4 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none h-20 resize-none font-medium transition-all"
@@ -185,13 +198,38 @@ export const ComanderoCarta = ({ mesa, onClose, onSuccess, pedidoExistente, user
                 className={`w-full py-4 rounded-xl font-bold text-sm tracking-wide transition-all shadow-sm
                   ${enviando || (carrito.length === 0 && nota.trim() === (pedidoExistente?.observacion || "")) ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-teal-600 text-white hover:bg-teal-700 hover:shadow-teal-600/20 shadow-md'}`}
              >
-                {enviando ? 'PROCESANDO...' : pedidoExistente ? 'ACTUALIZAR COMANDA' : 'ENVIAR A COCINA'}
+                {submitButtonText}
              </button>
           </div>
         </div>
       </div>
     </div>
   );
+};
+
+ComanderoCarta.propTypes = {
+  mesa: PropTypes.shape({
+    id_mesa: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    numero_mesa: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  }).isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func.isRequired,
+  pedidoExistente: PropTypes.shape({
+    id_pedido: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    observacion: PropTypes.string,
+  }),
+  userLogueado: PropTypes.shape({
+    id_usuario: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  }).isRequired,
+  productosCache: PropTypes.arrayOf(
+    PropTypes.shape({
+      id_producto: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      nombre: PropTypes.string.isRequired,
+      precio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      categoria: PropTypes.string,
+      estado: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    })
+  ).isRequired,
 };
 
 export default ComanderoCarta;

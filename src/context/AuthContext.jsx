@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import wayraApi from '../api/wayraApi';
 
 export const AuthContext = createContext();
@@ -38,6 +39,10 @@ export const AuthProvider = ({ children }) => {
     delete wayraApi.defaults.headers.common['Authorization'];
   };
 
+  const contextValue = useMemo(() => ({
+    user, isAuth, login, logout
+  }), [user, isAuth]);
+
   if (loading) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-slate-50">
@@ -48,8 +53,12 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isAuth, login, logout }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
+};
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };

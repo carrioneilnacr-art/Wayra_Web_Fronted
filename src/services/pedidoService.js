@@ -1,13 +1,13 @@
 import wayraApi from '../api/wayraApi';
 
 export const pedidoService = {
-  
+
   // 1. Obtener el historial completo de ventas por fecha (Admin)
   getHistorial: async (fecha) => {
     const res = await wayraApi.get(`/admin/historial?fecha=${fecha}`);
     return res.data;
   },
-  
+
   // 2. Obtener las mesas asignadas al mozo logueado
   getMesasMozo: async (idMozo) => {
     const res = await wayraApi.get(`/mozo/mesas?id_mozo=${idMozo}`);
@@ -28,7 +28,7 @@ export const pedidoService = {
     const res = await wayraApi.get(`/mozo/pedidos/estatus?id_mozo=${idMozo}`);
     return res.data;
   },
-// 🌟 NUEVO: Actualizar la nota/observación de un pedido activo
+  // 🌟 NUEVO: Actualizar la nota/observación de un pedido activo
   actualizarObservacion: async (idPedido, observacion) => {
     const res = await wayraApi.put(`/pedidos/${idPedido}/observacion`, { observacion });
     return res.data;
@@ -56,5 +56,5 @@ export const pedidoService = {
     const res = await wayraApi.put(`/pedidos/${idPedido}/checkout`, datosCheckout);
     return res.data;
   }
-  
+
 };

@@ -4,11 +4,11 @@ import { Accessibility, Moon, Sun, Type, RefreshCw, Eye } from 'lucide-react';
 
 export const AccessibilityWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { 
-    fontSize, setFontSize, 
-    isDarkMode, setIsDarkMode, 
+  const {
+    fontSize, setFontSize,
+    isDarkMode, setIsDarkMode,
     colorBlindMode, setColorBlindMode,
-    resetAccessibility 
+    resetAccessibility
   } = useContext(AccessibilityContext);
 
   return (
@@ -21,11 +21,11 @@ export const AccessibilityWidget = () => {
               <Accessibility size={20} className="text-blue-600" /> Accesibilidad
             </h3>
           </div>
-          
+
           {/* 🌓 1. MODO OSCURO */}
           <div className="mb-4">
-            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">Apariencia</label>
-            <button 
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">Apariencia</span>
+            <button
               onClick={() => setIsDarkMode(!isDarkMode)}
               className="flex items-center justify-between w-full p-2.5 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-xl transition-colors"
             >
@@ -42,18 +42,19 @@ export const AccessibilityWidget = () => {
           {/* 🔎 2. BARRA DE ARRASTRE (ZOOM TEXTO) */}
           <div className="mb-4">
             <div className="flex justify-between items-center mb-1">
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+              <label htmlFor="font-size-range" className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1">
                 <Type size={14} /> Tamaño de Pantalla
               </label>
               <span className="text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 px-2 py-0.5 rounded-md">
                 {Math.round((fontSize / 16) * 100)}%
               </span>
             </div>
-            <input 
-              type="range" 
-              min="13" 
-              max="24" 
-              value={fontSize} 
+            <input
+              id="font-size-range"
+              type="range"
+              min="13"
+              max="24"
+              value={fontSize}
               onChange={(e) => setFontSize(Number(e.target.value))}
               className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
             />
@@ -66,11 +67,12 @@ export const AccessibilityWidget = () => {
 
           {/* 🎨 3. MODOS DE COLOR / DALTONISMO */}
           <div className="mb-5">
-            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2 flex items-center gap-1">
+            <label htmlFor="colorblind-select" className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2 flex items-center gap-1">
               <Eye size={14} /> Filtros Visuales
             </label>
-            <select 
-              value={colorBlindMode} 
+            <select
+              id="colorblind-select"
+              value={colorBlindMode}
               onChange={(e) => setColorBlindMode(e.target.value)}
               className="w-full p-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-gray-100"
             >
@@ -83,7 +85,7 @@ export const AccessibilityWidget = () => {
           </div>
 
           {/* 🔄 4. BOTÓN RESTABLECER */}
-          <button 
+          <button
             onClick={resetAccessibility}
             className="flex items-center justify-center gap-2 w-full p-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 font-semibold text-xs uppercase tracking-wider rounded-xl transition-colors border border-red-200/40 dark:border-red-900/30"
           >
@@ -93,7 +95,7 @@ export const AccessibilityWidget = () => {
       )}
 
       {/* 🔘 BOTÓN PRINCIPAL FLOTANTE */}
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
         className="bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 flex items-center justify-center group"
         aria-label="Menú de accesibilidad"
