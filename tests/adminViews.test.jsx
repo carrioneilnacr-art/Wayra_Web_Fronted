@@ -60,8 +60,7 @@ describe('🧪 Tests para ViewHistorial', () => {
     });
   });
 
-  it('Debería abrir la boleta en otra pestaña al presionar Boleta', async () => {
-    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => { });
+  it('Debería abrir el modal de boleta al presionar Boleta', async () => {
     vi.spyOn(pedidoService, 'getHistorial').mockResolvedValue(mockPedidos);
 
     render(<ViewHistorial />);
@@ -71,8 +70,11 @@ describe('🧪 Tests para ViewHistorial', () => {
     });
 
     fireEvent.click(screen.getByText('Boleta'));
-    expect(openSpy).toHaveBeenCalled();
-    openSpy.mockRestore();
+    
+    // Al presionar boleta, debería aparecer el texto indicando que el ticket está cargando o visible
+    await waitFor(() => {
+      expect(screen.getByText('Cargando Comprobante...')).toBeInTheDocument();
+    });
   });
 
   it('Debería manejar errores al cargar historial', async () => {

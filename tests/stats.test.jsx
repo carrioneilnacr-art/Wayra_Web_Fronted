@@ -34,10 +34,7 @@ describe('🧪 Tests para ViewStats', () => {
       { fecha: '2026-06-24', total: 500 },
       { fecha: '2026-06-25', total: 600 },
     ],
-    notificaciones: {
-      insight: 'Los Makis representan el 40% de la venta.',
-      alerta: 'Demoras detectadas en cocina para Mesa 5.'
-    },
+    notificaciones: {},
     rendimientoMozos: [
       { nombre: 'MOZO CARLOS', total_vendido: '450.00', mesas: 8 }
     ]
@@ -76,13 +73,13 @@ describe('🧪 Tests para ViewStats', () => {
     expect(screen.getByText('150')).toBeInTheDocument();
     expect(screen.getByText('S/ 45.80')).toBeInTheDocument();
 
-    // Insights y Alertas
-    expect(screen.getByText('Los Makis representan el 40% de la venta.')).toBeInTheDocument();
-    expect(screen.getByText('Demoras detectadas en cocina para Mesa 5.')).toBeInTheDocument();
-
-    // Tabla de mozos
-    expect(screen.getByText('MOZO CARLOS')).toBeInTheDocument();
-    expect(screen.getByText('S/ 450.00')).toBeInTheDocument();
+    // Pestañas (Tabs)
+    expect(screen.getByText('General')).toBeInTheDocument();
+    expect(screen.getByText('Operaciones')).toBeInTheDocument();
+    expect(screen.getByText('Finanzas')).toBeInTheDocument();
+    
+    // Rotación de mesas
+    expect(screen.getByText('Rotación de Mesas')).toBeInTheDocument();
   });
 
   it('Debería manejar errores de API en cargarMetricas', async () => {
