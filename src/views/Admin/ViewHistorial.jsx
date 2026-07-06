@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { pedidoService } from '../../services/pedidoService';
 import wayraApi from '../../api/wayraApi'; // Se mantiene solo para acceder a la baseURL de las boletas impresas
+import ModalTicketHistorial from '../../components/Admin/ModalTicketHistorial';
 
 export const ViewHistorial = () => {
   const [pedidos, setPedidos] = useState([]);
   const [filtroFecha, setFiltroFecha] = useState(new Date().toLocaleDateString('en-CA'));
+  const [ticketSeleccionado, setTicketSeleccionado] = useState(null);
 
   const cargarHistorial = async () => {
     try {
@@ -86,7 +88,7 @@ export const ViewHistorial = () => {
                 {/* ACCIONES: BOTÓN MINIMALISTA */}
                 <td className="py-5 px-6 text-center">
                   <button          
-                    onClick={() => window.open(`${wayraApi.defaults.baseURL}/admin/boleta/${p.id_pedido}`, '_blank')}
+                    onClick={() => setTicketSeleccionado(p.id_pedido)}
                     className="inline-flex items-center gap-2 bg-slate-50 text-slate-600 py-2 px-4 rounded-xl border border-slate-200/40 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all text-[9px] font-black uppercase tracking-widest font-sans shadow-sm"
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -113,6 +115,13 @@ export const ViewHistorial = () => {
           </tbody>
         </table>
       </div>
+
+      {ticketSeleccionado && (
+        <ModalTicketHistorial 
+          idPedido={ticketSeleccionado} 
+          onClose={() => setTicketSeleccionado(null)} 
+        />
+      )}
 
     </div>
   );

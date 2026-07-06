@@ -41,7 +41,7 @@ async function login() {
 async function loadDynamicData() {
   console.log('Cargando productos y mozos desde la base de datos...');
   try {
-    const resProductos = await api.get('/admin/carta');
+    const resProductos = await api.get('/admin/productos/todos');
     // Asumiendo que devuelve un array de productos
     const carta = resProductos.data.carta || resProductos.data.data || resProductos.data || [];
     productosIds = carta.map(p => p.id_producto || p.id).filter(id => id);
@@ -49,8 +49,8 @@ async function loadDynamicData() {
 
     const resUsuarios = await api.get('/admin/usuarios');
     const usuarios = resUsuarios.data.usuarios || resUsuarios.data.data || resUsuarios.data || [];
-    mozosIds = usuarios.filter(u => u.rol === 'mozo' || u.rol === 'Mozo').map(u => u.id_usuario);
-    if (mozosIds.length === 0) mozosIds = [2]; // Fallback
+    mozosIds = usuarios.filter(u => u.rol.toLowerCase() === 'mozo').map(u => u.id_usuario);
+    if (mozosIds.length === 0) mozosIds = [3, 5]; // Fallback Gian y Francis
 
     console.log(`✅ ${productosIds.length} productos y ${mozosIds.length} mozos listos para simulación.`);
   } catch (error) {
@@ -84,9 +84,9 @@ async function createReserva(fecha, hora, mesaId, isDirect) {
   }
 }
 
-async function createPedidoAndCheckout(idMesa, nombreCliente) {
+async function createPedidoAndCheckout(idMesa, nombreCliente, fecha) {
   // 1. Crear el pedido con el payload exacto de ComanderoCarta
-  const numPlatos = getRandomInt(1, 4);
+  const numPlatos = getRandomInt(2, 6); // Más diferencia de platos
   const items = [];
   let total = 0;
 
@@ -111,7 +111,10 @@ async function createPedidoAndCheckout(idMesa, nombreCliente) {
       nombre_cliente: nombreCliente,
       items: items,
       observacion: "Atención rápida",
-      total: total
+      total: total,
+      fecha_pedido: fecha + ' 12:00:00', // Intento forzar la fecha
+      fecha_creacion: fecha + ' 12:00:00',
+      created_at: fecha + ' 12:00:00'
     });
 
     const pedidoData = resPedido.data.pedido || resPedido.data.data || resPedido.data;
@@ -160,17 +163,18 @@ async function runSeed() {
 
   for (const fecha of fechas) {
     console.log(`\n--- Generando datos para la fecha: ${fecha} ---`);
-    const atencionesDia = getRandomInt(3, 6);
+    // 100 pedidos totales / 5 días = 20 por día
+    const atencionesDia = 20;
 
     for (let i = 0; i < atencionesDia; i++) {
       const mesaId = getRandomInt(1, 8);
       const hora = getRandomItem(turnos);
-      const isDirect = Math.random() > 0.5;
+      const isDirect = false; // ESTRICTAMENTE RESERVAS
 
       const nombreCliente = await createReserva(fecha, hora, mesaId, isDirect);
 
       if (nombreCliente) {
-        await createPedidoAndCheckout(mesaId, nombreCliente);
+        await createPedidoAndCheckout(mesaId, nombreCliente, fecha);
       }
     }
   }
