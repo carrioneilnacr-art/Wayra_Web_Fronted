@@ -129,6 +129,104 @@ describe('🧪 Tests para PanelDerechoReservas', () => {
 
     confirmSpy.mockRestore();
   });
+
+  it('Debería manejar el error de la API al presionar LLEGÓ', async () => {
+    vi.spyOn(wayraApi, 'put').mockRejectedValue(new Error('Network error'));
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    
+    render(
+      <PanelDerechoReservas reservas={reservas} onTicketClick={onTicketClick} onSearch={onSearch}
+        onEdit={onEdit} fechaSeleccionada="2026-06-30" hoyStr="2026-06-30" onCheckIn={onCheckIn} user={{ id_usuario: 1 }}
+      />
+    );
+
+    fireEvent.click(screen.getByText('LLEGÓ ✔'));
+
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      expect(alertSpy).toHaveBeenCalledWith("Error al procesar el ingreso del cliente.");
+    });
+    alertSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('Debería manejar el error de la API al anular reserva', async () => {
+    const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(true);
+    vi.spyOn(wayraApi, 'put').mockRejectedValue(new Error('Network error'));
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    render(
+      <PanelDerechoReservas reservas={reservas} onTicketClick={onTicketClick} onSearch={onSearch}
+        onEdit={onEdit} fechaSeleccionada="2026-06-30" hoyStr="2026-06-30" onCheckIn={onCheckIn} user={{ id_usuario: 1 }}
+      />
+    );
+
+    fireEvent.click(screen.getByText('✕'));
+
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      expect(alertSpy).toHaveBeenCalledWith("Error al anular.");
+    });
+    confirmSpy.mockRestore();
+    alertSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('Debería renderizar colores del semaforo correctamente', () => {
+    const ahora = new Date();
+    
+    // Reserva emerald (confirmada)
+    const resConfirmada = { ...reservas[0], id_reserva: 2, estado_reserva: 'confirmada', nombre_cliente: 'CLI CONFIRMADO' };
+    
+    // Reserva rose (retraso crítico: >10 min)
+    const resRetraso = { ...reservas[0], id_reserva: 3, estado_reserva: 'pendiente', nombre_cliente: 'CLI RETRASO' };
+    const hRetraso = new Date(ahora.getTime() - 20 * 60000); // 20 mins ago
+    resRetraso.hora_reserva = `${String(hRetraso.getHours()).padStart(2, '0')}:${String(hRetraso.getMinutes()).padStart(2, '0')}`;
+    
+    // Reserva amber (cliente próximo: -10 a +15 min)
+    const resProximo = { ...reservas[0], id_reserva: 4, estado_reserva: 'pendiente', nombre_cliente: 'CLI PROXIMO' };
+    const hProximo = new Date(ahora.getTime() + 5 * 60000); // in 5 mins
+    resProximo.hora_reserva = `${String(hProximo.getHours()).padStart(2, '0')}:${String(hProximo.getMinutes()).padStart(2, '0')}`;
+    
+    // Reserva blue (a tiempo / futura > 15min)
+    const resFutura = { ...reservas[0], id_reserva: 5, estado_reserva: 'pendiente', nombre_cliente: 'CLI FUTURO' };
+    const hFutura = new Date(ahora.getTime() + 60 * 60000); // in 60 mins
+    resFutura.hora_reserva = `${String(hFutura.getHours()).padStart(2, '0')}:${String(hFutura.getMinutes()).padStart(2, '0')}`;
+
+    // Reserva cancelada
+    const resCancelada = { ...reservas[0], id_reserva: 6, estado_reserva: 'cancelada', nombre_cliente: 'CLI CANCELADO' };
+
+    const multReservas = [resConfirmada, resRetraso, resProximo, resFutura, resCancelada];
+    
+    const { container } = render(
+      <PanelDerechoReservas reservas={multReservas} onTicketClick={onTicketClick} onSearch={onSearch}
+        onEdit={onEdit} fechaSeleccionada={ahora.toLocaleDateString('en-CA')} hoyStr={ahora.toLocaleDateString('en-CA')} onCheckIn={onCheckIn} user={{ id_usuario: 1 }}
+      />
+    );
+
+    expect(screen.getByText('CLI CONFIRMADO')).toBeInTheDocument();
+    expect(screen.getByText('CLI RETRASO')).toBeInTheDocument();
+    expect(screen.getByText('CLI PROXIMO')).toBeInTheDocument();
+    expect(screen.getByText('CLI FUTURO')).toBeInTheDocument();
+    expect(screen.getByText('CLI CANCELADO')).toBeInTheDocument();
+
+    // Comprobar onEdit en la primera reserva pendiente (que es CLI RETRASO)
+    // Hay múltiples botones de ⚙️, seleccionamos el primero y probamos onEdit
+    const editBtns = screen.getAllByText('⚙️');
+    if (editBtns.length > 0) {
+      fireEvent.click(editBtns[0]);
+      expect(onEdit).toHaveBeenCalled();
+    }
+    
+    // Comprobar onTicketClick si renderiza (si id_pedido está, el botón de "VER PREVENTA" debería llamar a onTicketClick)
+    const ticketBtns = screen.getAllByText(/VER PREVENTA #P-/i);
+    if (ticketBtns.length > 0) {
+      fireEvent.click(ticketBtns[0]);
+      expect(onTicketClick).toHaveBeenCalled();
+    }
+  });
 });
 
 describe('🧪 Tests para ModalesRecepcion', () => {
@@ -147,8 +245,13 @@ describe('🧪 Tests para ModalesRecepcion', () => {
     expect(screen.getByText('CARLOS SAINZ')).toBeInTheDocument();
     expect(screen.getByText('99887766')).toBeInTheDocument();
 
-    fireEvent.keyDown(globalThis, { key: 'Escape', code: 'Escape' });
+    fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('ModalDetalleTicket debería retornar null si no hay ticket', () => {
+    const { container } = render(<ModalDetalleTicket ticket={null} onClose={vi.fn()} />);
+    expect(container.firstChild).toBeNull();
   });
 
   it('ModalListaDia debería listar sesiones y permitir seleccionar una', () => {
@@ -163,6 +266,13 @@ describe('🧪 Tests para ModalesRecepcion', () => {
 
     fireEvent.click(screen.getByText('PEDRO PICA PIEDRA').closest('button'));
     expect(onSelectTicket).toHaveBeenCalledWith(lista[0]);
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('ModalListaDia debería cerrar al presionar Escape', () => {
+    const onClose = vi.fn();
+    render(<ModalListaDia lista={[]} onClose={onClose} onSelectTicket={vi.fn()} />);
+    fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
     expect(onClose).toHaveBeenCalled();
   });
 });

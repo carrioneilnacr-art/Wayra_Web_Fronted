@@ -103,4 +103,105 @@ describe('🧪 Tests para ViewMesasMozo', () => {
     fireEvent.click(screen.getByTitle('Cerrar Sesión'));
     expect(onLogout).toHaveBeenCalled();
   });
+
+  it('Debería manejar errores de API en cargarDatos', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.mocked(reservaService.getMesas).mockRejectedValueOnce(new Error('Network error'));
+    vi.spyOn(pedidoService, 'getEstatusPedidos').mockResolvedValue([]);
+    vi.spyOn(pedidoService, 'getReservasMozoHoy').mockResolvedValue([]);
+    vi.spyOn(productoService, 'getTodos').mockResolvedValue([]);
+    
+    console.log("DEBUG TEST: isMock?", !!reservaService.getMesas.mock);
+    render(<ViewMesasMozo user={mockUser} onLogout={onLogout} />);
+    console.log("DEBUG TEST: render finished");
+    
+    await new Promise(r => setTimeout(r, 0));
+    
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Error en la API:", expect.any(Error));
+    });
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('Debería impedir atender una quinta mesa', async () => {
+    const alertSpy = vi.spyOn(globalThis, 'alert').mockImplementation(() => { });
+    
+    // Crear 4 pedidos activos para el mozo actual
+    const cuatroPedidos = [
+      { id_pedido: 1, id_mesa: 1, estado_pedido: 'PREPARACION', id_mozo: mockUser.id_usuario },
+      { id_pedido: 2, id_mesa: 2, estado_pedido: 'PREPARACION', id_mozo: mockUser.id_usuario },
+      { id_pedido: 3, id_mesa: 3, estado_pedido: 'PREPARACION', id_mozo: mockUser.id_usuario },
+      { id_pedido: 4, id_mesa: 4, estado_pedido: 'PREPARACION', id_mozo: mockUser.id_usuario },
+    ];
+    // Y una 5ta mesa libre
+    const mesasCinco = [
+      { id_mesa: 1, numero_mesa: 1, estado: 'ocupada' },
+      { id_mesa: 2, numero_mesa: 2, estado: 'ocupada' },
+      { id_mesa: 3, numero_mesa: 3, estado: 'ocupada' },
+      { id_mesa: 4, numero_mesa: 4, estado: 'ocupada' },
+      { id_mesa: 5, numero_mesa: 5, estado: 'disponible' },
+    ];
+
+    vi.spyOn(reservaService, 'getMesas').mockResolvedValue(mesasCinco);
+    vi.spyOn(pedidoService, 'getEstatusPedidos').mockResolvedValue(cuatroPedidos);
+    
+    render(<ViewMesasMozo user={mockUser} onLogout={onLogout} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('5')).toBeInTheDocument();
+    });
+
+    // Intentar atender mesa 5 que está disponible
+    fireEvent.click(screen.getByText('5').closest('button'));
+
+    expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('LÍMITE ALCANZADO'));
+    alertSpy.mockRestore();
+  });
+
+  it('Debería probar la funcionalidad de ModalCheckout y ComanderoCarta callbacks', async () => {
+    const mesasMock = [{ id_mesa: 10, numero_mesa: 10, estado: 'disponible' }];
+    vi.spyOn(reservaService, 'getMesas').mockResolvedValue(mesasMock);
+    vi.spyOn(pedidoService, 'getEstatusPedidos').mockResolvedValue([]);
+    
+    render(<ViewMesasMozo user={mockUser} onLogout={onLogout} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('10')).toBeInTheDocument();
+    });
+
+    // Abrir ComanderoCarta (click en mesa libre)
+    fireEvent.click(screen.getByText('10').closest('button'));
+
+    // Debe mostrar botón de cerrar mesa (onClose de ComanderoCarta) en algún lugar,
+    // pero para probar callbacks necesitamos saber si renderiza el Modal o hacer un mock.
+    // Dado que ComanderoCarta renderiza, si hacemos "Volver", deberíamos poder cerrarlo.
+    const btnVolver = screen.getByRole('button', { name: /^Cerrar$/i });
+    expect(btnVolver).toBeInTheDocument();
+    fireEvent.click(btnVolver);
+    
+    // El modal debería desaparecer
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /^Cerrar$/i })).not.toBeInTheDocument();
+    });
+  });
+
+  it('Debería manejar exactamente 3 mesas (color ambar)', async () => {
+    const tresPedidos = [
+      { id_pedido: 1, id_mesa: 1, estado_pedido: 'PREPARACION', id_mozo: mockUser.id_usuario },
+      { id_pedido: 2, id_mesa: 2, estado_pedido: 'PREPARACION', id_mozo: mockUser.id_usuario },
+      { id_pedido: 3, id_mesa: 3, estado_pedido: 'PREPARACION', id_mozo: mockUser.id_usuario },
+    ];
+    vi.spyOn(reservaService, 'getMesas').mockResolvedValue([]);
+    vi.spyOn(pedidoService, 'getEstatusPedidos').mockResolvedValue(tresPedidos);
+    
+    const { container } = render(<ViewMesasMozo user={mockUser} onLogout={onLogout} />);
+    
+    await waitFor(() => {
+      expect(pedidoService.getEstatusPedidos).toHaveBeenCalled();
+    });
+    
+    // Verificamos si existe un elemento con la clase bg-amber-400
+    const amberElement = container.querySelector('.bg-amber-400');
+    expect(amberElement).toBeInTheDocument();
+  });
 });

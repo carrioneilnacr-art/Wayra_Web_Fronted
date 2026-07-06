@@ -21,6 +21,7 @@ export const ViewMesasMozo = ({ onLogout, user }) => {
 
   const cargarDatos = async () => {
     try {
+      console.log("DEBUG CARGARDATOS: isMock?", !!reservaService.getMesas.mock);
       const [resM, resP, resR, resC] = await Promise.all([
         reservaService.getMesas(),
         pedidoService.getEstatusPedidos(user?.id_usuario),

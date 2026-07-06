@@ -44,13 +44,17 @@ export const ViewRecepcion = ({ onLogout, user }) => {
   }, [fechaSeleccionada]);
 
   const handleGuardar = async (form) => {
+    console.log("DEBUG GUARDAR: Start");
     if (!form) { cargarDatos(); setMostrarForm(false); setMesaSel(null); setReservaAEditar(null); return; }
     
     try {
+      console.log("DEBUG GUARDAR: Calling saveReserva");
       await reservaService.saveReserva(form, reservaAEditar?.id_reserva, user?.id_usuario);
+      console.log("DEBUG GUARDAR: saveReserva succeeded");
       setMostrarForm(false); setMesaSel(null); setReservaAEditar(null);
       cargarDatos();
     } catch (e) {
+      console.log("DEBUG GUARDAR: error in saveReserva", e);
       console.error("Error al procesar reserva:", e);
       alert("Error de red al procesar la reserva.");
     }

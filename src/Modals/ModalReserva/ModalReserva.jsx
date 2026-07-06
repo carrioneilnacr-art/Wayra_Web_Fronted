@@ -39,22 +39,28 @@ const ModalReserva = ({ mesa, onClose, onSave, todasLasReservas = [], fechaSelec
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("DEBUG SUBMIT: Start");
     if (!form.hora_reserva) return alert("Selecciona un turno");
 
     if (!reservaEdit && form.fecha_reserva === hoyStr) {
+      console.log("DEBUG SUBMIT: Entering getAsignarMozo");
       try {
         const dataMozo = await reservaService.getAsignarMozo();
+        console.log("DEBUG SUBMIT: dataMozo=", dataMozo);
         if (dataMozo.success) {
           alert(`Mozo asignado: ${dataMozo.mozo.nombre}`);
           onSave({ ...form, id_mozo: dataMozo.mozo.id_usuario });
         } else {
-          onSave(form);
+          alert("No hay mozos activos, asignando por defecto (Sistema).");
+          onSave({ ...form, id_mozo: 1 });
         }
       } catch (err) {
+        console.log("DEBUG SUBMIT: error getAsignarMozo", err);
         console.error("Error asignando mozo:", err);
         onSave(form);
       }
     } else {
+      console.log("DEBUG SUBMIT: calling onSave direct");
       onSave(form);
     }
   };

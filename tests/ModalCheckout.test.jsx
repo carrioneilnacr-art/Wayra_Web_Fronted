@@ -141,4 +141,47 @@ describe('🧪 Tests para ModalCheckout', () => {
     // Debería estar de vuelta en el paso 1 (visualizando el botón Continuar al Pago)
     expect(screen.getByRole('button', { name: 'Continuar al Pago' })).toBeInTheDocument();
   });
+
+  it('Debería manejar el flujo completo con FACTURA', async () => {
+    render(<ModalCheckout pedido={mockPedido} reservas={[]} onClose={onClose} onSuccess={onSuccess} />);
+
+    // Cambiar a FACTURA
+    fireEvent.click(screen.getByRole('button', { name: /Factura/i }));
+    
+    // Rellenar datos
+    fireEvent.change(screen.getByPlaceholderText('Ingrese RUC'), { target: { value: '12345678901' } });
+    fireEvent.change(screen.getByPlaceholderText('Nombre de la empresa'), { target: { value: 'Mi Empresa 123' } });
+    fireEvent.change(screen.getByPlaceholderText('Dirección completa'), { target: { value: 'Av Principal 123' } });
+
+    // Botón Continuar debe estar habilitado
+    const continueBtn = screen.getByRole('button', { name: 'Continuar al Pago' });
+    expect(continueBtn).not.toBeDisabled();
+    
+    // Y luego cambiar a Boleta para ver que se limpian los campos
+    fireEvent.click(screen.getByRole('button', { name: /Boleta/i }));
+    expect(screen.getByPlaceholderText('Ingrese DNI')).toHaveValue('');
+  });
+
+  it('Debería manejar el error al procesar el pago', async () => {
+    vi.spyOn(pedidoService, 'procesarCheckout').mockRejectedValue(new Error('Network error'));
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    render(<ModalCheckout pedido={mockPedido} reservas={mockReservas} onClose={onClose} onSuccess={onSuccess} />);
+
+    // Avanzar a paso 2
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar al Pago' }));
+
+    // Pagar
+    fireEvent.click(screen.getByRole('button', { name: /PAGAR S\// }));
+
+    await waitFor(() => {
+      expect(pedidoService.procesarCheckout).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      expect(alertSpy).toHaveBeenCalledWith("Error al procesar el pago. Verifica la conexión.");
+    });
+
+    alertSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+  });
 });

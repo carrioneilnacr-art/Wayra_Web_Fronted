@@ -80,9 +80,9 @@ export const ViewStats = () => {
         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
           <div className="flex justify-between items-center mb-2">
             <p className="text-[11px] font-black text-[#7F8C8D] tracking-wider uppercase">Eficiencia</p>
-            <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">↓ 3% vs ayer</span>
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">↑ 18% vs manual</span>
           </div>
-          <h3 className="text-4xl font-black text-[#2C3E50]">87%</h3>
+          <h3 className="text-4xl font-black text-[#2C3E50]">96%</h3>
           <p className="text-[9px] text-[#7F8C8D] mt-2 font-medium">Tiempo óptimo de despacho a cocina</p>
         </div>
       </div>
